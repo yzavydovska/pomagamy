@@ -29,7 +29,6 @@
       "favicon": "./assets/welcome3.png"
     },
     "plugins": [
-      "expo-font",
       [
         "expo-image-picker",
         {

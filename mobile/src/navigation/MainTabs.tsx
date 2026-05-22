@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import type { MainTabParamList } from './types'
 import { HomeStack } from './HomeStack'
 import { OrgHomeStack } from './OrgHomeStack'
@@ -55,7 +55,6 @@ export function MainTabs() {
           if (route.name === 'OgloszeniaTab') {
             return focused ? (
               <View style={activeWrap}>
-                {/* Wypełnione „home” bywa uszkodzone w niektórych wersjach fontu — outline jest stabilne. */}
                 <Ionicons name="home-outline" size={iconSize} color="#fff" />
               </View>
             ) : (
