@@ -31,7 +31,12 @@ import {
 import { validateEmail, validatePasswordStrength } from '../auth/passwordPolicy'
 import { ORG_REGISTRATION_STATUT_OPTIONAL } from '../config/featureFlags'
 import { fetchUserRole } from '../firebase/adminAuth'
-import { normalizeKrsInput, normalizeNipInput, isPlausibleKrs, nipValidationError } from '../utils/polishOrgIds'
+import {
+  normalizeNipInput,
+  nipValidationError,
+  normalizedKrsDigits,
+  krsValidationErrorOptional,
+} from '../utils/polishOrgIds'
 import {
   fetchUserProfile,
   firebaseAcceptApplication,
@@ -377,12 +382,12 @@ export function PomagaMYProvider({ children }: { children: ReactNode }) {
       }
       if (data.role === 'organization') {
         const nipErr = nipValidationError(data.organizationNip ?? '')
-        const krsOk = normalizeKrsInput(data.organizationKrs ?? '')
+        const krsErr = krsValidationErrorOptional(data.organizationKrs ?? '')
         if (nipErr) {
           return { ok: false as const, message: nipErr }
         }
-        if (!isPlausibleKrs(krsOk)) {
-          return { ok: false as const, message: 'Podaj poprawny numer KRS (9–10 cyfr).' }
+        if (krsErr) {
+          return { ok: false as const, message: krsErr }
         }
         if (!ORG_REGISTRATION_STATUT_OPTIONAL && !data.statutAsset?.uri) {
           return {
@@ -422,7 +427,7 @@ export function PomagaMYProvider({ children }: { children: ReactNode }) {
         interests: data.role === 'volunteer' ? [] : undefined,
         orgVerificationStatus: data.role === 'organization' ? 'pending' : undefined,
         orgNip: data.role === 'organization' ? normalizeNipInput(data.organizationNip ?? '') : undefined,
-        orgKrs: data.role === 'organization' ? normalizeKrsInput(data.organizationKrs ?? '') : undefined,
+        orgKrs: data.role === 'organization' ? normalizedKrsDigits(data.organizationKrs ?? '') : undefined,
         orgStatutLabel:
           data.role === 'organization' && data.statutAsset?.name
             ? data.statutAsset.name.trim()
@@ -672,7 +677,7 @@ export function PomagaMYProvider({ children }: { children: ReactNode }) {
       }
       const visible = session.orgVerificationStatus === 'approved'
       const nip = normalizeNipInput(session.orgNip ?? '')
-      const krs = normalizeKrsInput(session.orgKrs ?? '')
+      const krs = normalizedKrsDigits(session.orgKrs ?? '')
       const o: Ogloszenie = {
         id: draft.id ?? uid(),
         kod: draft.kod ?? `OG-${Math.floor(100 + Math.random() * 899)}`,

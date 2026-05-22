@@ -5,7 +5,7 @@
     "scheme": "pomagamy",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/welcome3.png",
+    "icon": "./assets/welcome2.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "splash": {
@@ -18,8 +18,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/welcome3.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/welcome2.png",
+        "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,

@@ -38,7 +38,7 @@ import {
   resolveComplaintTargetId,
   publicIdForFirebaseUser,
 } from '../utils/publicIds'
-import { normalizeKrsInput, normalizeNipInput, isPlausibleKrs, nipValidationError } from '../utils/polishOrgIds'
+import { normalizeNipInput, nipValidationError, normalizedKrsDigits, krsValidationErrorOptional } from '../utils/polishOrgIds'
 import { ORG_REGISTRATION_STATUT_OPTIONAL } from '../config/featureFlags'
 import { getFirebaseAuth, getFirebaseDb, getFirebaseStorage } from './client'
 import type { UserRole as AuthRole } from './adminAuth'
@@ -390,21 +390,19 @@ export async function firebaseRegisterAppUser(data: {
   const key = data.email.trim().toLowerCase()
   const isOrg = data.role === 'organization'
   let nipDigits = ''
-  let krsTrim = ''
+  let krsDigits = ''
 
   if (isOrg) {
     nipDigits = normalizeNipInput(data.organizationNip ?? '')
-    krsTrim = normalizeKrsInput(data.organizationKrs ?? '')
     const nipErr = nipValidationError(data.organizationNip ?? '')
+    const krsErr = krsValidationErrorOptional(data.organizationKrs ?? '')
     if (nipErr) {
       return { ok: false, message: nipErr }
     }
-    if (!isPlausibleKrs(krsTrim)) {
-      return {
-        ok: false,
-        message: 'Podaj poprawny numer KRS (9–10 cyfr).',
-      }
+    if (krsErr) {
+      return { ok: false, message: krsErr }
     }
+    krsDigits = normalizedKrsDigits(data.organizationKrs ?? '')
     if (!ORG_REGISTRATION_STATUT_OPTIONAL && !data.statutAsset?.uri) {
       return {
         ok: false,
@@ -470,7 +468,7 @@ export async function firebaseRegisterAppUser(data: {
         email: key,
         telefon: data.phone.trim(),
         nip: nipDigits,
-        krs: krsTrim,
+        krs: krsDigits,
         kod: `ORG-${Math.floor(100 + Math.random() * 899)}`,
         zgloszonoData: new Date().toISOString(),
         zgloszonoPelna: new Date().toLocaleString('pl-PL'),
@@ -478,7 +476,7 @@ export async function firebaseRegisterAppUser(data: {
         www: '',
         dokumenty: {
           nip: true,
-          krs: true,
+          krs: krsDigits.length > 0,
           statut: !!statutUrl,
         },
         dokumentyPliki: dokumentyPlikiOrg,

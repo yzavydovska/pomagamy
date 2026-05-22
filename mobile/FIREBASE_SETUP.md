@@ -1,5 +1,7 @@
 # Firebase (Auth + Firestore) — PomagaMY
 
+**Produktowo:** aplikacja jest obecnie kierowana **tylko na Android**; konfiguracja Firebase poniżej dotyczy tej samej aplikacji React Native działającej na Androidzie.
+
 Bez pliku `.env` aplikacja działa w **trybie demo** (mocki + lokalna „sesja” admina).  
 Gdy ustawisz zmienne `EXPO_PUBLIC_FIREBASE_*`, panel admina używa **Firebase Authentication** i **Cloud Firestore**.
 

@@ -1,5 +1,5 @@
 /**
- * Tymczasowo: rejestracja jako organizacja bez pliku statutu.
- * Ustaw na false przed publikacją produkcyjną, gdy znowu wymagany będzie załącznik.
+ * Rejestracja organizacji: plik statutu (PDF / zdjęcie).
+ * `false` — wymagany razem z NIP; KRS jest osobno opcjonalny (nie każda organizacja ma wpis KRS).
  */
-export const ORG_REGISTRATION_STATUT_OPTIONAL = true
+export const ORG_REGISTRATION_STATUT_OPTIONAL = false

@@ -44,6 +44,25 @@ export function isPlausibleKrs(krs: string): boolean {
   return d.length >= 9 && d.length <= 10
 }
 
+/** KRS zapisany w bazie — tylko cyfry albo pusty (brak wpisu KRS). */
+export function normalizedKrsDigits(raw: string): string {
+  return normalizeKrsInput(raw).replace(/\D/g, '')
+}
+
+/**
+ * KRS przy rejestracji organizacji — pole opcjonalne (np. stowarzyszenia bez wpisu do KRS).
+ * Puste = OK; jeśli coś wpisano, musi być 9–10 cyfr.
+ */
+export function krsValidationErrorOptional(raw: string): string | null {
+  const cleaned = normalizeKrsInput(raw)
+  const digits = cleaned.replace(/\D/g, '')
+  if (digits.length === 0) return null
+  if (!isPlausibleKrs(cleaned)) {
+    return 'Jeśli podajesz numer KRS, wpisz 9–10 cyfr. Organizacja bez KRS może zostawić pole puste.'
+  }
+  return null
+}
+
 /** NIP dla widoku aplikacji (np. XXX-XXX-XX-XX), gdy są dokładnie 10 cyfr. */
 export function formatNipForDisplay(raw: string | undefined): string {
   const s = String(raw ?? '').trim()

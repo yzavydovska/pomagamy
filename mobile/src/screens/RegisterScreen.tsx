@@ -21,7 +21,7 @@ import { colors } from '../theme/colors'
 import { radius, spacing } from '../theme/spacing'
 import type { UserRole } from '../types/mvp'
 import { ORG_REGISTRATION_STATUT_OPTIONAL } from '../config/featureFlags'
-import { isPlausibleKrs, nipValidationError, normalizeKrsInput } from '../utils/polishOrgIds'
+import { nipValidationError, krsValidationErrorOptional } from '../utils/polishOrgIds'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>
 
@@ -95,13 +95,13 @@ export function RegisterScreen({ navigation }: Props) {
     }
     if (role === 'organization') {
       const nipErr = nipValidationError(orgNip)
-      const krsClean = normalizeKrsInput(orgKrs)
+      const krsErr = krsValidationErrorOptional(orgKrs)
       if (nipErr) {
         Alert.alert('NIP', nipErr)
         return
       }
-      if (!isPlausibleKrs(krsClean)) {
-        Alert.alert('KRS', 'Podaj poprawny numer KRS (9–10 cyfr).')
+      if (krsErr) {
+        Alert.alert('KRS', krsErr)
         return
       }
       if (!ORG_REGISTRATION_STATUT_OPTIONAL && !statutAsset?.uri) {
@@ -166,7 +166,7 @@ export function RegisterScreen({ navigation }: Props) {
               onChangeText={setOrganizationName}
             />
 
-            <Text style={styles.label}>NIP organizacji</Text>
+            <Text style={styles.label}>NIP organizacji (wymagany)</Text>
             <TextInput
               style={styles.input}
               placeholder="10 cyfr (bez lub z myślnikami)"
@@ -176,21 +176,22 @@ export function RegisterScreen({ navigation }: Props) {
               onChangeText={setOrgNip}
             />
 
-            <Text style={styles.label}>Numer KRS</Text>
+            <Text style={styles.label}>Numer KRS (opcjonalnie)</Text>
             <TextInput
               style={styles.input}
-              placeholder="np. 0000123456"
+              placeholder="Zostaw puste, jeśli organizacja nie ma wpisu KRS"
               placeholderTextColor={colors.textLight}
               autoCapitalize="none"
               keyboardType="numbers-and-punctuation"
               value={orgKrs}
               onChangeText={setOrgKrs}
             />
+            <Text style={styles.miniHint}>NIP i dokument statutu są wymagane. KRS tylko gdy faktycznie obowiązuje u Twojej organizacji.</Text>
 
             <Text style={styles.label}>
               {ORG_REGISTRATION_STATUT_OPTIONAL
                 ? 'Statut — plik PDF lub zdjęcie (opcjonalnie)'
-                : 'Statut — plik PDF lub zdjęcie'}
+                : 'Statut — plik PDF lub zdjęcie (wymagany)'}
             </Text>
             <Pressable style={styles.statutBtn} onPress={() => void pickStatut()}>
               <Ionicons name="attach-outline" size={22} color={colors.primary} />
@@ -203,8 +204,8 @@ export function RegisterScreen({ navigation }: Props) {
             </Pressable>
             <Text style={styles.docHint}>
               {ORG_REGISTRATION_STATUT_OPTIONAL
-                ? 'Tymczasowo możesz zarejestrować organizację bez pliku. NIP i KRS trafią do administratora; statut możesz dosłać przed weryfikacją.'
-                : 'Dane NIP, KRS i dokument statutu trafią do administratora w celu weryfikacji konta.'}
+                ? 'Tymczasowo możesz zarejestrować się bez statutu — uzupełnij dokument przed weryfikacją.'
+                : 'NIP oraz statut trafią do administratora. KRS tylko jeśli go posiadasz.'}
             </Text>
           </>
         )}
@@ -373,6 +374,13 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     color: colors.textMuted,
     marginBottom: spacing.sm,
+  },
+  miniHint: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textMuted,
+    marginTop: -4,
+    marginBottom: spacing.xs,
   },
   checkRow: {
     flexDirection: 'row',

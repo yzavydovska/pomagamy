@@ -303,7 +303,7 @@ export function AdminOrganizationDetailScreen({ navigation, route }: Props) {
             <TextInput
               value={rejectReasonDraft}
               onChangeText={setRejectReasonDraft}
-              placeholder={`Np. dokumenty są niekompletne — dodaj aktualny KRS lub czytelny statut.`}
+              placeholder={`Np. dokumenty nieczytelne — popraw lub uzupełnij aktualny statut albo dopisz KRS, jeśli dotyczy.`}
               placeholderTextColor={colors.textMuted}
               editable={!acting}
               multiline
