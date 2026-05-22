@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Firebase Console → Storage → Rules (Reguły) → Opublikuj.
+// Wymaga włączonego Firebase Storage w projekcie i poprawnego EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function callerIsAdminFromFirestore() {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /avatars/{userId}.jpg {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 4 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    /**
+     * Statut organizacji przy rejestracji (PDF lub obraz, max 15 MB).
+     * Odczyt: właściciel konta lub admin (rola z Firestore users/{uid}).
+     */
+    match /orgDocs/{userId}/{fileName} {
+      allow read: if request.auth != null
+        && (request.auth.uid == userId || callerIsAdminFromFirestore());
+
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 15 * 1024 * 1024
+        && (
+          request.resource.contentType == 'application/pdf'
+          || request.resource.contentType.matches('image/.*')
+        );
+
+      allow delete: if callerIsAdminFromFirestore()
+        || (request.auth != null && request.auth.uid == userId);
+    }
+  }
+}

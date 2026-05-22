@@ -1,0 +1,25 @@
+/** Kolory z makiet Figma (PomagaMY) */
+export const colors = {
+  primary: '#B67D2B',
+  primaryDark: '#9A6824',
+  primarySoft: 'rgba(182, 125, 43, 0.12)',
+  background: '#F5F5F5',
+  surface: '#FFFFFF',
+  text: '#1A1A1A',
+  textMuted: '#6B6560',
+  textLight: '#9E9E9E',
+  border: '#E7E2DA',
+  inputBg: '#FAF8F5',
+  successBg: '#E8F5E9',
+  successText: '#2E7D32',
+  link: '#B67D2B',
+  chipInactiveBg: '#FFFFFF',
+  blueTag: '#E3F2FD',
+  blueTagText: '#1565C0',
+  /** Admin / skargi (makiety Figma) */
+  adminWarningBg: '#FFF3E0',
+  adminWarningBorder: '#FF9800',
+  adminDangerBg: '#FFEBEE',
+  adminDangerText: '#C62828',
+  adminDangerBorder: '#EF5350',
+} as const

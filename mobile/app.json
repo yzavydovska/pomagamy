@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "PomagaMY",
+    "slug": "pomagamy-wolontariat",
+    "scheme": "pomagamy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/welcome3.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/welcome3.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/welcome3.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.pomagamywolontariat"
+    },
+    "web": {
+      "favicon": "./assets/welcome3.png"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "PomagaMY używa zdjęcia, aby pokazać Twoje logo lub zdjęcie profilowe.",
+          "cameraPermission": "PomagaMY może zapisać zdjęcie z aparatu jako zdjęcie profilowe."
+        }
+      ],
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "most-recent"
+        }
+      ]
+    ]
+  }
+}

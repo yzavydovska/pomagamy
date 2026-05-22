@@ -1,0 +1,32 @@
+Lp.	Sekcja	Rola	Funkcjonalność	Opis	MoSCoW	Uwagi MVP (2 tygodnie)
+1	Rejestracja i logowanie	Gość	Tworzenie konta	Rejestracja jako wolontariusz lub osoba potrzebująca pomocy (organizacja).	Must	Tak — pełna ścieżka z podziałem ról.
+2	Rejestracja i logowanie	Gość	Logowanie przez e-mail	Dostęp za pomocą e-maila i hasła.	Must	Tak.
+3	Rejestracja i logowanie	Gość	Logowanie przez media społecznościowe	Logowanie np. Google, Facebook.	Should	Nie w obowiązkowym MVP.
+4	Rejestracja i logowanie	Gość lub zalogowany	Reset hasła	Reset hasła (np. link na e-mail).	Must	Tak — minimum e-mail; bez wymogu wszystkich providerów.
+5	Rejestracja i logowanie	Użytkownik zalogowany	Wylogowanie	Zakończenie sesji użytkownika.	Must	Tak.
+6	Profil użytkownika	Użytkownik zalogowany	Przegląd profilu	Dane, rola; docelowo statystyki, gwiazdki, historia.	Must	Uproszczenie: rola, dane, listy moje zgłoszenia i moje ogłoszenia; bez gwiazdek.
+7	Profil użytkownika	Użytkownik zalogowany	Edycja profilu	Imię, zdjęcie, opis, dane kontaktowe.	Must	Tak; minimum: identyfikacja i kontakt.
+8	Profil użytkownika	Użytkownik zalogowany	Usuwanie konta	Trwałe usunięcie własnego konta.	Should	Opcjonalnie w sprincie.
+9	Opinie i oceny	Organizacja	Ocena wolontariusza	Po zakończeniu zadania organizacja ocenia wolontariusza.	Should	Po MVP.
+10	Opinie i oceny	Wolontariusz	Ocena organizacji	Ocena po wykonanym zadaniu.	Should	Po MVP.
+11	Opinie i oceny	Wolontariusz lub organizacja	Komentarze dwustronne	Komentarze z obu stron.	Should	Po MVP.
+12	Ogłoszenia	Organizacja	Tworzenie ogłoszeń	Tylko organizacja (lub konto powiązane z organizacją) dodaje ogłoszenia o pomocy.	Must	Tak; w MVP prosta weryfikacja konta org.; pełny proces weryfikacji później.
+13	Ogłoszenia	Gość lub zalogowany	Przegląd ogłoszeń	Przeglądanie listy ogłoszeń.	Must	Tak.
+14	Ogłoszenia	Gość lub zalogowany	Filtrowanie i wyszukiwanie	Kategoria, lokalizacja, termin.	Should	Po MVP lub na końcu sprintu.
+15	Ogłoszenia	Organizacja, właściciel	Edycja i usuwanie ogłoszeń	Edycja i usunięcie własnych ogłoszeń.	Should	W MVP często wystarczy usunięcie przez admina.
+16	Zgłoszenia	Wolontariusz	Wysyłanie zgłoszenia	Zgłoszenie chęci pomocy przy ogłoszeniu.	Must	Tak.
+17	Zgłoszenia	Organizacja	Akceptacja zgłoszenia	Wybór wolontariusza z listy zgłoszeń.	Must	Tak.
+18	Zgłoszenia	Organizacja	Zakończenie zadania	Potwierdzenie realizacji po wykonaniu.	Must	Tak.
+19	Powiadomienia	Wolontariusz lub organizacja	Powiadomienia o zmianie statusu	Informacja o zmianie statusu zgłoszenia (docelowo push).	Must	W MVP: tylko w aplikacji. Push: Should.
+20	Skargi i nadużycia	Użytkownik zalogowany	Zgłaszanie nadużyć i skarg	Ogłoszenia, zachowania, nieuczciwe oceny.	Must	Tak: formularz i zapis.
+21	Gamifikacja	Wolontariusz	Zdobywanie gwiazdek	Punkty za wykonane zadania.	Could	Nie w sprincie.
+22	Gamifikacja	Wolontariusz	Sklep z nagrodami	Wymiana gwiazdek na nagrody.	Could	Nie w sprincie.
+23	Gamifikacja	Wolontariusz	Bilans gwiazdek	Liczba gwiazdek w profilu.	Could	Nie w sprincie.
+24	Administrator	Administrator	Moderacja ogłoszeń	Usuwanie ogłoszeń naruszających regulamin.	Must	Tak.
+25	Administrator	Administrator	Zarządzanie nagrodami	Dodawanie i edycja nagród w sklepie.	Could	Nie w sprincie.
+26	Administrator	Administrator	Zarządzanie użytkownikami	Podgląd profili i blokada kont.	Must	Tak: blokada i podstawowe dane.
+27	Administrator	Administrator	Analiza skarg	Przegląd skarg i działania.	Should	W MVP lista skarg; pełny workflow później.
+28	Strona projektu	Gość	Landing WordPress	Strona publiczna PomagaMY, linki do aplikacji.	Must	Tak (motyw landing w repozytorium).
+29	Poza sprintem	—	System czatu	Czat między użytkownikami.	Won't	Nie teraz.
+30	Poza sprintem	—	Kalendarz i mapy	Integracje zewnętrzne.	Won't	Nie teraz.
+31	Poza sprintem	—	Partnerstwa B2B (skala)	Duże programy firmowe.	Won't	Nie teraz.

@@ -1,0 +1,272 @@
+rules_version = '2';
+
+// Firebase Console → Firestore → Reguły → Opublikuj (Publish).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function sessionOrgName() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationName;
+    }
+
+    function sessionRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    /** Organizacja z zweryfikowanym kontem — może publikować ogłoszenia (visibleToVolunteers: true). */
+    function orgIsApproved() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && sessionRole() == 'organization'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.orgVerificationStatus == 'approved';
+    }
+
+    function orgCanManageApplication() {
+      return sessionRole() == 'organization' && (
+        resource.data.organizerUid == request.auth.uid ||
+        (
+          resource.data.organizerName == sessionOrgName()
+          && resource.data.get('organizerUid', null) == null
+        )
+      );
+    }
+
+    /** Kształt dokumentu in-app powiadomienia (minimalna lista pól jak w aplikacji). */
+    function inAppNotificationPayloadShapeOk(nId) {
+      return request.resource.data.keys().hasOnly(['id', 'title', 'body', 'read', 'createdAt', 'applicationId'])
+        && request.resource.data.id == nId
+        && request.resource.data.id is string
+        && request.resource.data.title is string
+        && request.resource.data.body is string
+        && request.resource.data.read is bool
+        && request.resource.data.createdAt is string
+        && (
+          request.resource.data.applicationId == null
+          || request.resource.data.applicationId is string
+        );
+    }
+
+    /**
+     * Organizacja zapisuje wiadomość u wolontariusza (ścieżka users/{volunteerUid}/inAppNotifications).
+     * Dozwolone tylko, gdy dokument `applications/{applicationId}` należy do tego wolontariusza
+     * i jest obsługiwany przez aktualnie zalogowaną organizację (jak przy update statusu).
+     */
+    function orgCreatesNotificationForVolunteer(volunteerPathUid) {
+      return sessionRole() == 'organization'
+        && request.resource.data.applicationId is string
+        && request.resource.data.applicationId.size() >= 8
+        && exists(/databases/$(database)/documents/applications/$(request.resource.data.applicationId))
+        && get(/databases/$(database)/documents/applications/$(request.resource.data.applicationId)).data.volunteerUid == volunteerPathUid
+        && (
+          get(/databases/$(database)/documents/applications/$(request.resource.data.applicationId)).data.organizerUid == request.auth.uid
+          || (
+            get(/databases/$(database)/documents/applications/$(request.resource.data.applicationId)).data.get(
+              'organizerUid',
+              null
+            ) == null
+            && get(/databases/$(database)/documents/applications/$(request.resource.data.applicationId)).data.organizerName == sessionOrgName()
+          )
+        );
+    }
+
+    /** Zapis zgłoszenia tylko z kontem wolontariusza (dokument users/{uid}). */
+    function sessionVolunteer() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'volunteer';
+    }
+
+    /** Pierwszy zapis pola `accountPublicId` przez właściciela konta (dopełnienie dla starszych rejestracji). */
+    function userSelfAllowsAccountPublicIdBackfill(uid) {
+      return request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['accountPublicId'])
+        && (
+          !resource.data.keys().hasAny(['accountPublicId'])
+          || resource.data.accountPublicId == null
+          || resource.data.accountPublicId == ''
+        )
+        && request.resource.data.accountPublicId is string
+        && request.resource.data.accountPublicId.matches('^(W|O)-[A-Z0-9]+$');
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+
+      allow create: if request.auth != null && request.auth.uid == userId
+        && (request.resource.data.role == 'volunteer'
+          || request.resource.data.role == 'organization')
+        && (
+          request.resource.data.role == 'volunteer'
+          || request.resource.data.orgVerificationStatus == 'pending'
+        );
+
+      /** Profil lub — wyłącznie dla organizacji — powrót do kolejki po odrzuceniu przez admina. */
+      allow update: if isAdmin() || userSelfAllowsAccountPublicIdBackfill(userId) || (
+        request.auth.uid == userId
+        && (
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['displayName', 'phone', 'about', 'city', 'organizationName', 'avatarUrl', 'interests'])
+          || (
+            resource.data.role == 'organization'
+            && resource.data.orgVerificationStatus == 'rejected'
+            && request.resource.data.orgVerificationStatus == 'pending'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['orgVerificationStatus'])
+          )
+        )
+      );
+
+      match /inAppNotifications/{nId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+
+        /** Wolontariusz — własne powiadomienia; organizacja — zapis przy akceptacji / zakończeniu (+ powiązane flow). */
+        allow create: if request.auth != null
+          && inAppNotificationPayloadShapeOk(nId)
+          && (
+            request.auth.uid == userId
+            || orgCreatesNotificationForVolunteer(userId)
+          );
+
+        allow update, delete: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    match /applications/{appId} {
+      allow read: if request.auth != null && (
+        isAdmin()
+        || resource.data.volunteerUid == request.auth.uid
+        || resource.data.organizerUid == request.auth.uid
+      );
+
+      allow create: if sessionVolunteer()
+        && request.resource.data.volunteerUid == request.auth.uid;
+
+      allow update: if request.auth != null && (isAdmin() || orgCanManageApplication());
+    }
+
+    match /ogloszenia/{listingId} {
+      // Publicznie: ogłoszenia widoczne dla wolontariuszy (nawet bez logowania).
+      // get(..., false) — starsze dokumenty bez pola nie psują reguły przy agregacjach/licznikach.
+      allow read: if resource.data.get('visibleToVolunteers', false) == true
+        || (request.auth != null && (
+          isAdmin()
+          || resource.data.get('createdByUid', '') == request.auth.uid
+        ));
+
+      allow create: if request.auth != null
+        && request.resource.data.createdByUid == request.auth.uid
+        && (
+          orgIsApproved()
+          || request.resource.data.visibleToVolunteers == false
+        );
+
+      /**
+       * Właściciel: domyślnie brak szerokiej edycji.
+       * Dozwolone wąsko:
+       * - `status` → „Zakończone”,
+       * - archiwizacja: `archived: true`, `visibleToVolunteers: false`,
+       * - przywrócenie: `archived: false`; widoczność `true` tylko przy zatwierdzonej organizacji.
+       */
+      allow update: if isAdmin()
+        || (
+          request.auth != null
+          && resource.data.get('createdByUid', '') == request.auth.uid
+          && (
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+              && request.resource.data.status == 'Zakończone'
+            )
+            || (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['archived', 'visibleToVolunteers'])
+              && request.resource.data.archived == true
+              && request.resource.data.visibleToVolunteers == false
+            )
+            || (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['archived', 'visibleToVolunteers'])
+              && request.resource.data.archived == false
+              && (
+                (orgIsApproved() && request.resource.data.visibleToVolunteers == true)
+                || (!orgIsApproved() && request.resource.data.visibleToVolunteers == false)
+              )
+            )
+          )
+        );
+
+      allow delete: if request.auth != null && (
+        isAdmin()
+        || resource.data.createdByUid == request.auth.uid
+      );
+    }
+
+    /** Zmiana wyłącznie statusu moderacji skargi (panel admina). */
+    function complaintModerationPatchOk() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['moderationStatus', 'moderatedAt'])
+        && (
+          request.resource.data.moderationStatus == 'pending'
+          || request.resource.data.moderationStatus == 'resolved'
+          || request.resource.data.moderationStatus == 'rejected'
+        )
+        && (
+          request.resource.data.moderatedAt == null
+          || request.resource.data.moderatedAt is string
+        );
+    }
+
+    match /complaints/{cId} {
+      allow read: if request.auth != null
+        && (resource.data.reporterUid == request.auth.uid || isAdmin());
+      allow create: if request.auth != null
+        && !isAdmin()
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.refTargetId is string
+        && request.resource.data.refTargetId.size() >= 5
+        && request.resource.data.refTargetId.matches('^(ORG|OG|[WOZ])-[A-Za-z0-9]+$')
+        && (
+          !request.resource.data.keys().hasAny(['moderationStatus'])
+          || request.resource.data.moderationStatus == 'pending'
+        )
+        && (
+          !request.resource.data.keys().hasAny(['moderatedAt'])
+          || request.resource.data.moderatedAt == null
+        );
+
+      allow update: if isAdmin() && complaintModerationPatchOk();
+    }
+
+    /** Tylko liczniki panelu — aplikacja nie korzysta z Firestore do tłumaczeń ani innych dokumentów w `admin/`. */
+    match /admin/stats {
+      allow read, write: if isAdmin();
+    }
+
+    match /organizations/{orgId} {
+      allow read: if request.auth != null && (isAdmin() || request.auth.uid == orgId);
+
+      allow create: if request.auth != null && request.auth.uid == orgId
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.verificationStatus == 'pending';
+
+      /** Admin — dowolnie. Właściciel — pole statyczne lub jednorazowy powrót rejected → pending (z aktualizacją dat zgłoszenia). */
+      allow update: if isAdmin() || (
+        request.auth.uid == orgId
+        && (
+          request.resource.data.verificationStatus == resource.data.verificationStatus
+          || (
+            resource.data.verificationStatus == 'rejected'
+            && request.resource.data.verificationStatus == 'pending'
+            && request.resource.data.ownerUid == resource.data.ownerUid
+            && request.resource.data.verificationRejectionReason == ''
+            && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['verificationStatus', 'zgloszonoData', 'zgloszonoPelna', 'verificationRejectionReason'])
+          )
+        )
+      );
+
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,41 @@
+# Środowisko / sekrety (nigdy do repo)
+.env
+.env.*
+!.env.example
+
+# Zależności
+**/node_modules/
+
+# Expo / RN (mobile/)
+mobile/.expo/
+mobile/.expo-export-test/
+mobile/dist/
+mobile/web-build/
+mobile/expo-env.d.ts
+mobile/android/
+mobile/ios/
+
+# Build / narzędzia
+**/dist/
+**/.vite/
+**/coverage/
+*.tsbuildinfo
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logi
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Cursor / tymczasowe pliki Office
+.cursor/
+~$*
+
+# Duże archiwa motywu (jeśli trzymasz tylko rozpakowany folder WP)
+*.zip
