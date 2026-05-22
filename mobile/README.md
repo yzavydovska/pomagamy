@@ -24,3 +24,7 @@ Do szybkich testów aplikacji w **Expo Go** (telefon Android) można użyć `npm
 ## Produkcja i inne platformy
 
 iOS i strona WWW **nie są** w zakresie bieżącej pracy nad aplikacją — dodanie ich będzie osobnym etapem.
+
+## Historia zmian na GitHub
+
+Aby widzieć dla promotora lub promotorki projektu opis kolejnych kroków (np. dostęp do panelu administratora z ekranu powitalnego w trybie bez Firebase), trzymaj listę wpisów w **`CHANGELOG.md`**. Jak częściej wypychać małe zmiany — krótkie wskazówki w **`docs/git-pushy-kroki.md`**.
