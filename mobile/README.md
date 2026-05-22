@@ -27,4 +27,6 @@ iOS i strona WWW **nie są** w zakresie bieżącej pracy nad aplikacją — doda
 
 ## Historia zmian na GitHub
 
-Aby widzieć dla promotora lub promotorki projektu opis kolejnych kroków (np. dostęp do panelu administratora z ekranu powitalnego w trybie bez Firebase), trzymaj listę wpisów w **`CHANGELOG.md`**. Jak częściej wypychać małe zmiany — krótkie wskazówki w **`docs/git-pushy-kroki.md`**.
+- **`CHANGELOG.md`** — zestaw zmian oraz **indeks ośmiu rozdzielonych tematów** z linkami do [`docs/podsumowanie/`](docs/podsumowanie/).
+- Karty **`01` … `08`** w `podsumowanie/` są celowo **różnymi commity**, żeby na GitHubie było wiele osobnych, czytelnych wpisów w historii.
+- **`docs/git-pushy-kroki.md`** — jak często robić commity oraz kiedy synchronizować repozytorium tylko‑mobile (`pomagaMY_APP`).

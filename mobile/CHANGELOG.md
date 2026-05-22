@@ -5,7 +5,7 @@ Wpisujemy tu funkcje i ustawienia **bez przenoszenia pełnego kodu** między rep
 
 ## [Unreleased]
 
-- Zaplanowane kolejne kroki (np. kolejny sprint) wpisuj tutaj lub w osobnym Issues / tablicie.
+- Zaplanowane kolejne kroki (np. kolejny sprint): wpisuj w Issues lub w backlogu narzędzia projektowego.
 
 ### Indeks — rozbite podsumowania (`docs/podsumowanie/`)
 
