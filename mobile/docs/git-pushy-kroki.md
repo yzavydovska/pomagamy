@@ -12,6 +12,7 @@
    ```
 
 3. Dobre prefiksy: `feat:`, `fix:`, `docs:`, `chore:` — przy wielu plikach w jednym commicie wpisz w wiadomości najważniejszy powód („dlaczego”).
+4. Gdy promotor / promotorka projektu prosi o **„dużo różnych zmian widocznych na GitHubie”**, dodaj **osobny plik** pod `mobile/docs/podsumowanie/` (jeden ticket = jeden commit) lub zaktualizuj **jedno** miejsce w `CHANGELOG.md` — wtedy historia commitów robi się czytelna bez sztucznego dzielenia kodu.
 
 ## Repozytorium `yzavydovska/pomagaMY_APP` (sam `mobile/`)
 
