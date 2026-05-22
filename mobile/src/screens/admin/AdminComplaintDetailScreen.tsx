@@ -42,7 +42,7 @@ function formatPlDate(iso: string) {
 }
 
 function moderationLabel(s: ComplaintModerationStatus): string {
-  if (s === 'resolved') return 'Rozpatrzona'
+  if (s === 'resolved') return 'Zaakceptowana'
   if (s === 'rejected') return 'Odrzucona'
   return 'Oczekuje na decyzję'
 }
@@ -167,9 +167,15 @@ export function AdminComplaintDetailScreen({ navigation, route }: Props) {
       status === 'pending'
         ? 'Przywrócić status «oczekująca»?'
         : status === 'resolved'
-          ? 'Oznaczyć jako rozpatrzoną?'
-          : 'Oznaczyć jako odrzuconą?'
-    Alert.alert(title, 'Zmiana będzie widoczna w liście skarg.', [
+          ? 'Zaakceptować skargę?'
+          : 'Odrzucić skargę?'
+    const detail =
+      status === 'resolved'
+        ? 'Skarga zostanie oznaczona jako przyjęta do zamknięcia (rozpatrzona).'
+        : status === 'rejected'
+          ? 'Skarga zostanie oznaczona jako odrzucona przez moderatora.'
+          : 'Zmiana będzie widoczna w liście skarg.'
+    Alert.alert(title, detail, [
       { text: 'Anuluj', style: 'cancel' },
       {
         text: 'Potwierdź',
@@ -263,16 +269,16 @@ export function AdminComplaintDetailScreen({ navigation, route }: Props) {
             {busy ? (
               <ActivityIndicator style={{ marginVertical: spacing.md }} color={colors.primary} />
             ) : null}
-            <Text style={styles.actionsHint}>Status skargi</Text>
+            <Text style={styles.actionsHint}>Zaakceptuj lub odrzuć skargę (tryb Firebase)</Text>
             <View style={styles.btnRowWrap}>
               <Pressable style={styles.btnNeutral} onPress={() => onSetModeration('pending')}>
                 <Text style={styles.btnNeutralText}>Oczekująca</Text>
               </Pressable>
               <Pressable style={styles.btnOk} onPress={() => onSetModeration('resolved')}>
-                <Text style={styles.btnOkText}>Rozpatrzona</Text>
+                <Text style={styles.btnOkText}>Zaakceptuj</Text>
               </Pressable>
               <Pressable style={styles.btnDangerOutlined} onPress={() => onSetModeration('rejected')}>
-                <Text style={styles.btnDangerText}>Odrzucona</Text>
+                <Text style={styles.btnDangerText}>Odrzuć</Text>
               </Pressable>
             </View>
 

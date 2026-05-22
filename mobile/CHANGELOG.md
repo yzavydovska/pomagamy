@@ -17,8 +17,16 @@ Każdy poniższy plik to **osobny temat do linkowania** w mailu lub na GitHubie 
 4. [04-organizacja-ogloszenia-zgloszenia.md](docs/podsumowanie/04-organizacja-ogloszenia-zgloszenia.md) — panel organizacji, nowe ogłoszenie, aplikanci, weryfikacja konta.
 5. [05-admin-dashboard-tab.md](docs/podsumowanie/05-admin-dashboard-tab.md) — trzy zakładki admina i kokpit.
 6. [06-admin-org-weryfikacja.md](docs/podsumowanie/06-admin-org-weryfikacja.md) — kolejka organizacji, approve/reject, ponowne `pending`.
-7. [07-admin-skargi-akcje.md](docs/podsumowanie/07-admin-skargi-akcje.md) — moderacja skarg, zawieszenia kont przy zgodnych regułach.
+7. [07-admin-skargi-akcje.md](docs/podsumowanie/07-admin-skargi-akcje.md) — moderacja skarg, przyciski statusu przy Firebase, zawieszenia kont.
 8. [08-firestore-storage-rules.md](docs/podsumowanie/08-firestore-storage-rules.md) — przybliżenie `firestore.rules` i `storage.rules` w repo.
+9. [09-akceptacja-odrzucenie-skargi.md](docs/podsumowanie/09-akceptacja-odrzucenie-skargi.md) — dokumentacja przycisków zaakceptuj / odrzuć skargę (Firebase).
+
+## [2026-05-23]
+
+### Moderacja skarg (Firebase)
+
+- Ekran szczegółu skargi admina (`AdminComplaintDetailScreen`): przyciski **Zaakceptuj** (status `resolved`, wyświetlany jako **Zaakceptowana**) oraz **Odrzuć** (`rejected`), plus **Oczekująca** (przywrócenie `pending`); komunikaty potwierdzenia w `Alert`.
+- Lista skarg Firebase (`AdminComplaintsScreen`): oznaczenia statusów zgodne z powyższym.
 
 ## [2026-05-22]
 

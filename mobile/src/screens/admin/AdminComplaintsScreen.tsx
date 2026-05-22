@@ -131,7 +131,7 @@ export function AdminComplaintsScreen() {
                       pending ? styles.pillTextActive : resolved ? styles.pillTextDone : styles.pillTextNeutral,
                     ]}
                   >
-                    {pending ? 'Oczekuje' : resolved ? 'Rozpatrzona' : 'Odrzucona'}
+                    {pending ? 'Oczekuje' : resolved ? 'Zaakceptowana' : 'Odrzucona'}
                   </Text>
                 </View>
               </View>

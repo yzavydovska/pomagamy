@@ -27,6 +27,6 @@ iOS i strona WWW **nie są** w zakresie bieżącej pracy nad aplikacją — doda
 
 ## Historia zmian na GitHub
 
-- **`CHANGELOG.md`** — zestaw zmian oraz **indeks ośmiu rozdzielonych tematów** z linkami do [`docs/podsumowanie/`](docs/podsumowanie/).
-- Karty **`01` … `08`** w `podsumowanie/` są celowo **różnymi commity**, żeby na GitHubie było wiele osobnych, czytelnych wpisów w historii.
+- **`CHANGELOG.md`** — zestaw zmian oraz **indeks rozdzielonych tematów (01–09)** z linkami do [`docs/podsumowanie/`](docs/podsumowanie/).
+- Karty **`01` … `09`** w `podsumowanie/` można dopisywać **osobnymi commitami**, żeby na GitHubie było wiele czytelnych wpisów w historii.
 - **`docs/git-pushy-kroki.md`** — jak często robić commity oraz kiedy synchronizować repozytorium tylko‑mobile (`pomagaMY_APP`).
