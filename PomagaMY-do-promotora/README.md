@@ -19,7 +19,6 @@ Repozytorium pracy dyplomowej: aplikacja wolontariacka i materiały projektu.
 | [`arkusze-moscow/`](arkusze-moscow/), `MOSCOW-*` | Analiza MoSCoW |
 | [`figma/`](figma/) | Makiety UI |
 | [`raporty/`](raporty/) | Raporty |
-| [`PomagaMY-do-promotora/`](PomagaMY-do-promotora/) | Paczka do wysyłki / przeglądu (kod + dokumentacja + prezentacja + instrukcja) |
 
 ## Szybki start (aplikacja mobilna)
 

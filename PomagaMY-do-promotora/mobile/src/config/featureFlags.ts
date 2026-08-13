@@ -1,0 +1,1 @@
+export const ORG_REGISTRATION_STATUT_OPTIONAL = false

@@ -1,0 +1,38 @@
+PomagaMY — materiały do przeglądu (praca dyplomowa)
+====================================================
+
+Zawartość tego folderu
+----------------------
+mobile/                         — aplikacja mobilna (Expo / React Native, Android)
+web/                            — warstwa webowa
+wordpress-landing-wolontariat/  — motyw WordPress (landing)
+dokumentacja-projektu/          — dokumentacja projektu (.docx)
+prezentacja-obrona/             — prezentacja na obronę (.pptx)
+README.md                       — opis repozytorium
+
+Pełne repozytorium (kod + MoSCoW, Figma, raporty):
+https://github.com/yzavydovska/pomagamy
+
+Ten folder na GitHubie:
+https://github.com/yzavydovska/pomagamy/tree/main/PomagaMY-do-promotora
+
+Jak uruchomić aplikację mobilną
+-------------------------------
+1. Zainstaluj Node.js (LTS).
+2. W terminalu:
+     cd mobile
+     npm install
+3. (Opcjonalnie) skopiuj .env.example → .env i uzupełnij klucze Firebase.
+   Bez .env aplikacja startuje w trybie demonstracyjnym.
+4. Uruchom:
+     npm run start:go
+   (podgląd w Expo Go na telefonie Android)
+   albo:
+     npm run android
+   (emulator / urządzenie z Android Studio)
+
+Uwagi
+-----
+- W paczce nie ma folderu node_modules (instaluje się przez npm install).
+- W paczce nie ma pliku .env (sekrety Firebase).
+- Ten folder możesz spakować do ZIP i wysłać e-mailem.
