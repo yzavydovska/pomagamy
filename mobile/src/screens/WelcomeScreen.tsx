@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import type { RootStackParamList } from '../navigation/types'
@@ -27,7 +27,7 @@ export function WelcomeScreen({ navigation }: Props) {
             hitSlop={8}
           >
             <Ionicons name="shield-outline" size={18} color={colors.primary} />
-            <Text style={styles.adminLinkText}>Panel administratora (tryb bez Firebase)</Text>
+            <Text style={styles.adminLinkText}>Panel administratora (offline)</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </Pressable>
         </View>

@@ -1,6 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
-/** Kopiuje wybrane zdjęcie do katalogu dokumentów (trwały plik `file://` pod Androidem/iOS). */
 export async function persistPickedAvatarLocal(sourceUri: string, registryKey: string): Promise<string> {
   const base = FileSystem.documentDirectory
   if (!base) return sourceUri

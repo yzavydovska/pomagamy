@@ -1,6 +1,5 @@
-/** Dane przykładowe dla panelu administratora, gdy aplikacja działa bez połączenia z bazą. */
 
-/** Zera przed pierwszym udanym odczytem z Firestore — unikamy mylących liczb „demo”. */
+
 export const adminStatystykiPoczatkowe = {
   uzytkownicy: 0,
   ogloszenia: 0,
@@ -9,7 +8,6 @@ export const adminStatystykiPoczatkowe = {
   skargi: 0,
 }
 
-/** Dane demonstracyjne wyłącznie przy błędzie agregacji / braku dostępu — nie są z produkcyjnej bazy. */
 export const adminStatystyki = {
   uzytkownicy: 847,
   ogloszenia: 142,
@@ -39,9 +37,9 @@ export type OrganizacjaDoWeryfikacji = {
   nazwa: string
   nip: string
   krs: string
-  /** Stan w kolejce weryfikacji (Firestore `organizations.verificationStatus`). */
+  
   verificationStatus: 'pending' | 'approved' | 'rejected'
-  /** Tekst dla organizacji przy odrzuceniu (Firestore `organizations.verificationRejectionReason`). */
+  
   verificationRejectionReason?: string
   dokumenty: { statut: boolean; krs: boolean; nip: boolean }
   zgloszonoData: string

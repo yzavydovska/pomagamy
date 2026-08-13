@@ -51,6 +51,5 @@ export async function clearAdminSession(): Promise<void> {
       await deleteAsync(path, { idempotent: true })
     }
   } catch {
-    // ignore
   }
 }

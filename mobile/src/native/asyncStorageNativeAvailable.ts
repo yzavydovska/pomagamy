@@ -1,9 +1,5 @@
 import { NativeModules, Platform, TurboModuleRegistry } from 'react-native'
 
-/**
- * Czy zlinkowany jest natywny moduł używany przez @react-native-async-storage/async-storage.
- * Sam pakiet JS rzuca przy imporcie, gdy go brakuje — dlatego sprawdzamy most zanim zrobimy require().
- */
 export function isAsyncStorageNativeAvailable(): boolean {
   if (Platform.OS === 'web') return false
   try {

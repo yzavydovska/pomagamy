@@ -47,7 +47,7 @@ $gid = 'gp-' . preg_replace('/[^a-z0-9-]/i', '', function_exists('wp_unique_id')
 			</svg>
 		</span>
 		<span class="wol-store-badge__text">
-			<span class="wol-store-badge__label"><?php esc_html_e('Pobierz w', 'wolontariat-landing'); ?></span>
+			<span class="wol-store-badge__label">Pobierz w</span>
 			<span class="wol-store-badge__name">Google Play</span>
 		</span>
 	</a>
@@ -58,7 +58,7 @@ $gid = 'gp-' . preg_replace('/[^a-z0-9-]/i', '', function_exists('wp_unique_id')
 			</svg>
 		</span>
 		<span class="wol-store-badge__text">
-			<span class="wol-store-badge__label"><?php esc_html_e('Pobierz w', 'wolontariat-landing'); ?></span>
+			<span class="wol-store-badge__label">Pobierz w</span>
 			<span class="wol-store-badge__name">App Store</span>
 		</span>
 	</a>

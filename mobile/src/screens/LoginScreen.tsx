@@ -17,7 +17,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import type { RootStackParamList } from '../navigation/types'
 import { AuthHeader } from '../components/AuthHeader'
 import { usePomagaMY } from '../context/PomagaMYContext'
-import { fetchUserRole } from '../firebase/adminAuth'
+import { resolveUserRoleAfterLogin } from '../firebase/adminAuth'
 import { getFirebaseAuth } from '../firebase/client'
 import { isFirebaseConfigured } from '../firebase/env'
 import { colors } from '../theme/colors'
@@ -40,7 +40,7 @@ export function LoginScreen({ navigation }: Props) {
   const [secure, setSecure] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  /** Zapas na Androidzie, gdzie Alert po await bywa niewidoczny bez odroczenia. */
+  
   const [inlineError, setInlineError] = useState<string | null>(null)
 
   const openLoginFailedAlert = (message: string) => {
@@ -56,7 +56,6 @@ export function LoginScreen({ navigation }: Props) {
       },
     ]
     const show = () => Alert.alert('Coś poszło nie tak', fullMessage, buttons)
-    // Po zamknięciu klawiatury / zakończeniu interakcji Alert na Androidzie nie ginie.
     InteractionManager.runAfterInteractions(() => {
       if (Platform.OS === 'android') {
         setTimeout(show, 50)
@@ -82,7 +81,15 @@ export function LoginScreen({ navigation }: Props) {
             await auth.authStateReady()
           }
           const u = auth.currentUser
-          const role = u ? await fetchUserRole(u.uid) : null
+          if (!u) {
+            setInlineError('Zalogowano, ale sesja nie jest jeszcze gotowa. Spróbuj ponownie.')
+            return
+          }
+          const role = await resolveUserRoleAfterLogin(u.uid)
+          if (!role) {
+            setInlineError('Nie udało się wczytać profilu użytkownika. Spróbuj ponownie za chwilę.')
+            return
+          }
           resetRootStack(navigation, role === 'admin' ? 'AdminMain' : 'Main')
         } else {
           navigation.replace('Main')

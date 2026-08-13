@@ -11,7 +11,6 @@ let db: Firestore | undefined
 let storage: FirebaseStorage | undefined
 
 function getFirebaseAuthInternal(a: FirebaseApp): Auth {
-  // Bez require() na pakiecie async-storage, gdy brak natywu — inaczej Metro loguje ERROR mimo try/catch.
   if (!isAsyncStorageNativeAvailable()) {
     return getAuth(a)
   }

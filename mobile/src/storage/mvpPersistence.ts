@@ -1,8 +1,4 @@
-/**
- * Persystencja lokalna (AsyncStorage), gdy aplikacja działa bez połączenia z kontem w chmurze.
- * Najpierw sprawdzamy most (isAsyncStorageNativeAvailable); require pakietu bez natywu rzuca i Metro loguje ERROR.
- * Bez modułu natywnego: pamięć procesu — dane znikną po restarcie; pełna persystencja: npx expo run:android.
- */
+
 import { isAsyncStorageNativeAvailable } from '../native/asyncStorageNativeAvailable'
 import type { MvpPersistedState, StoredUser } from '../types/mvp'
 

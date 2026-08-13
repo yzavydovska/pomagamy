@@ -1,9 +1,8 @@
-/** Oczyszczenie NIP do 10 cyfr (bez myślników). */
+
 export function normalizeNipInput(raw: string): string {
   return raw.replace(/\D/g, '').slice(0, 10)
 }
 
-/** Walidacja polskiego NIP (10 cyfr + suma kontrolna). */
 export function isValidPolishNip(digits: string): boolean {
   if (digits.length !== 10) return false
   const weights = [6, 5, 7, 2, 3, 4, 5, 6, 7]
@@ -16,10 +15,6 @@ export function isValidPolishNip(digits: string): boolean {
   return check === Number(digits[9])
 }
 
-/**
- * Jednolite komunikaty dla formularzy: `null` = NIP jest poprawny po normalizacji.
- * Uwaga: numery jak „1234567899” mają 10 cyfr, ale są odrzucane — niepoprawna suma kontrolna.
- */
 export function nipValidationError(raw: string): string | null {
   const digits = normalizeNipInput(raw)
   if (digits.length === 0) {
@@ -34,7 +29,6 @@ export function nipValidationError(raw: string): string | null {
   return null
 }
 
-/** KRS — bez zbędnych spacji. */
 export function normalizeKrsInput(raw: string): string {
   return raw.replace(/\s/g, '').trim()
 }
@@ -44,15 +38,10 @@ export function isPlausibleKrs(krs: string): boolean {
   return d.length >= 9 && d.length <= 10
 }
 
-/** KRS zapisany w bazie — tylko cyfry albo pusty (brak wpisu KRS). */
 export function normalizedKrsDigits(raw: string): string {
   return normalizeKrsInput(raw).replace(/\D/g, '')
 }
 
-/**
- * KRS przy rejestracji organizacji — pole opcjonalne (np. stowarzyszenia bez wpisu do KRS).
- * Puste = OK; jeśli coś wpisano, musi być 9–10 cyfr.
- */
 export function krsValidationErrorOptional(raw: string): string | null {
   const cleaned = normalizeKrsInput(raw)
   const digits = cleaned.replace(/\D/g, '')
@@ -63,7 +52,6 @@ export function krsValidationErrorOptional(raw: string): string | null {
   return null
 }
 
-/** NIP dla widoku aplikacji (np. XXX-XXX-XX-XX), gdy są dokładnie 10 cyfr. */
 export function formatNipForDisplay(raw: string | undefined): string {
   const s = String(raw ?? '').trim()
   if (!s) return '—'

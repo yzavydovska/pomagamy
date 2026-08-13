@@ -15,7 +15,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { AuthHeader } from '../components/AuthHeader'
 import { ProfileAvatarCircle } from '../components/ProfileAvatarCircle'
 import { VOLUNTEER_INTEREST_OPTIONS } from '../constants/volunteerInterests'
+import { ORG_REGISTRATION_STATUT_OPTIONAL } from '../config/featureFlags'
 import { usePomagaMY } from '../context/PomagaMYContext'
+import { nipValidationError, krsValidationErrorOptional } from '../utils/polishOrgIds'
 import { isExpoImagePickerNativeAvailable } from '../native/expoImagePickerNativeAvailable'
 import type { RootStackParamList } from '../navigation/types'
 import { colors } from '../theme/colors'
@@ -45,10 +47,16 @@ export function EditProfileScreen({ navigation }: Props) {
   const [city, setCity] = useState(session?.city ?? '')
   const [about, setAbout] = useState(session?.about ?? '')
   const [orgName, setOrgName] = useState(session?.organizationName ?? '')
+  const [orgNip, setOrgNip] = useState(session?.orgNip ?? '')
+  const [orgKrs, setOrgKrs] = useState(session?.orgKrs ?? '')
+  const [statutAsset, setStatutAsset] = useState<{
+    uri: string
+    name: string
+    mimeType?: string | null
+  } | null>(null)
   const [avatarUriDraft, setAvatarUriDraft] = useState(session?.avatarUri ?? '')
   const [interestsDraft, setInterestsDraft] = useState<string[]>(session?.interests ?? [])
 
-  // Nie sync przy każdej zmianie referencji session (np. po odświeżeniu MVP) — to kasowało wybrane zainteresowania przed zapisem.
   useFocusEffect(
     useCallback(() => {
       const s = sessionRef.current
@@ -58,6 +66,9 @@ export function EditProfileScreen({ navigation }: Props) {
       setCity(s.city ?? '')
       setAbout(s.about ?? '')
       setOrgName(s.organizationName ?? '')
+      setOrgNip(s.orgNip ?? '')
+      setOrgKrs(s.orgKrs ?? '')
+      setStatutAsset(null)
       setAvatarUriDraft(s.avatarUri ?? '')
       setInterestsDraft(s.role === 'volunteer' ? [...(s.interests ?? [])] : [])
     }, []),
@@ -125,13 +136,70 @@ export function EditProfileScreen({ navigation }: Props) {
     setInterestsDraft((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }
 
+  const pickStatut = async () => {
+    try {
+      const DocumentPicker = await import('expo-document-picker')
+      const res = await DocumentPicker.getDocumentAsync({
+        copyToCacheDirectory: true,
+        type: ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'],
+      })
+      if (res.canceled) return
+      const asset = res.assets?.[0]
+      if (!asset?.uri) return
+      const maxBytes = 15 * 1024 * 1024
+      if (asset.size != null && asset.size > maxBytes) {
+        Alert.alert('Plik za duży', 'Maksymalny rozmiar statutu to 15 MB.')
+        return
+      }
+      setStatutAsset({
+        uri: asset.uri,
+        name: asset.name ?? 'statut',
+        mimeType: asset.mimeType ?? null,
+      })
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      if (/native module|ExpoDocumentPicker|cannot find/i.test(msg)) {
+        Alert.alert(
+          'Przebuduj aplikację (Android)',
+          'Moduł wyboru dokumentów wymaga ponownego zbudowania aplikacji natywnej.\n\nW folderze mobile uruchom:\n\nnpx expo run:android',
+        )
+        return
+      }
+      Alert.alert('Błąd', 'Nie udało się wybrać pliku.')
+    }
+  }
+
   const onSave = async () => {
+    if (session.role === 'organization') {
+      const nipErr = nipValidationError(orgNip)
+      const krsErr = krsValidationErrorOptional(orgKrs)
+      if (nipErr) {
+        Alert.alert('NIP', nipErr)
+        return
+      }
+      if (krsErr) {
+        Alert.alert('KRS', krsErr)
+        return
+      }
+      const hasStatut = Boolean(statutAsset?.uri || session.orgStatutUrl || session.orgStatutLabel)
+      if (!ORG_REGISTRATION_STATUT_OPTIONAL && !hasStatut) {
+        Alert.alert('Statut', 'Dołącz plik statutu (PDF lub zdjęcie), aby administrator mógł zweryfikować organizację.')
+        return
+      }
+    }
     const base = {
       displayName: displayName.trim(),
       phone: phone.trim(),
       city: city.trim(),
       about: about.trim(),
-      ...(session.role === 'organization' ? { organizationName: orgName.trim() } : {}),
+      ...(session.role === 'organization'
+        ? {
+            organizationName: orgName.trim(),
+            organizationNip: orgNip,
+            organizationKrs: orgKrs,
+            ...(statutAsset ? { statutAsset } : {}),
+          }
+        : {}),
       ...(isVolunteer ? { interests: [...interestsDraft] } : {}),
     }
     const hadAvatar = Boolean(session.avatarUri)
@@ -155,7 +223,7 @@ export function EditProfileScreen({ navigation }: Props) {
       Alert.alert(
         'Nie zapisano profilu',
         msg.includes('permission') || msg.includes('PERMISSION_DENIED')
-          ? 'Brak uprawnień w Firestore (np. brak pola interests w regułach). Opublikuj aktualne firestore.rules w konsoli Firebase.'
+          ? 'Brak uprawnień do zapisu profilu. Sprawdź ustawienia konta lub skontaktuj się z pomocą.'
           : msg || 'Spróbuj ponownie.',
       )
     }
@@ -251,6 +319,35 @@ export function EditProfileScreen({ navigation }: Props) {
               <Text style={styles.label}>Nazwa organizacji</Text>
               <TextInput style={styles.input} value={orgName} onChangeText={setOrgName} />
             </>
+            <Text style={styles.label}>NIP organizacji</Text>
+            <TextInput
+              style={styles.input}
+              value={orgNip}
+              onChangeText={setOrgNip}
+              keyboardType="number-pad"
+              placeholder="10 cyfr"
+            />
+            <Text style={styles.label}>KRS (opcjonalnie)</Text>
+            <TextInput
+              style={styles.input}
+              value={orgKrs}
+              onChangeText={setOrgKrs}
+              keyboardType="number-pad"
+              placeholder="9–10 cyfr, jeśli dotyczy"
+            />
+            <Text style={styles.label}>
+              {ORG_REGISTRATION_STATUT_OPTIONAL ? 'Statut — PDF lub zdjęcie (opcjonalnie)' : 'Statut — PDF lub zdjęcie'}
+            </Text>
+            <Pressable style={styles.statutBtn} onPress={() => void pickStatut()}>
+              <Text style={styles.statutBtnText}>
+                {statutAsset?.name ??
+                  session.orgStatutLabel ??
+                  (ORG_REGISTRATION_STATUT_OPTIONAL ? 'Wybierz plik statutu (max 15 MB)' : 'Wybierz plik statutu (max 15 MB)')}
+              </Text>
+            </Pressable>
+            {session.orgStatutUrl && !statutAsset ? (
+              <Text style={styles.hint}>Obecny dokument: {session.orgStatutLabel ?? 'Statut organizacji'} (zapisany w chmurze)</Text>
+            ) : null}
             <Text style={styles.label}>Imię i nazwisko / nazwa</Text>
             <TextInput style={styles.input} value={displayName} onChangeText={setDisplayName} />
             <Text style={styles.label}>Telefon</Text>
@@ -354,4 +451,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   btnCancelText: { color: colors.primary, fontWeight: '800', fontSize: 16 },
+  statutBtn: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    padding: 14,
+    marginBottom: spacing.md,
+    backgroundColor: colors.inputBg,
+  },
+  statutBtnText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
 })

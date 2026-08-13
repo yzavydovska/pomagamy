@@ -1,4 +1,4 @@
-/** Kategorie ogłoszeń — jedna lista dla formularza organizacji i filtrów wolontariusza. */
+
 export const OGLOSZENIA_KATEGORIE = [
   'Społeczne',
   'Pomoc zwierzętom',

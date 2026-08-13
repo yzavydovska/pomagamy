@@ -1,4 +1,4 @@
-/** Kolory z makiet Figma (PomagaMY) */
+
 export const colors = {
   primary: '#B67D2B',
   primaryDark: '#9A6824',
@@ -16,7 +16,7 @@ export const colors = {
   chipInactiveBg: '#FFFFFF',
   blueTag: '#E3F2FD',
   blueTagText: '#1565C0',
-  /** Admin / skargi (makiety Figma) */
+  
   adminWarningBg: '#FFF3E0',
   adminWarningBorder: '#FF9800',
   adminDangerBg: '#FFEBEE',

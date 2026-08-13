@@ -1,6 +1,5 @@
 import type { FirebaseOptions } from 'firebase/app'
 
-/** Wszystkie zmienne muszą mieć prefiks EXPO_PUBLIC_ (Expo wstrzykuje je przy bundlowaniu). */
 export function getFirebaseOptions(): FirebaseOptions | null {
   const apiKey = process.env.EXPO_PUBLIC_FIREBASE_API_KEY
   const authDomain = process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN

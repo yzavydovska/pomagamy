@@ -37,7 +37,6 @@ function formatEventDate(d: Date): string {
   }
 }
 
-/** Tylko nowe ogłoszenie — edycja przez organizacje wyłączona (osobny rozwój: zmiany + powiadomienia). */
 export function OrgNewOgloszenieScreen({ navigation }: Props) {
   const { addOgloszenie } = usePomagaMY()
 

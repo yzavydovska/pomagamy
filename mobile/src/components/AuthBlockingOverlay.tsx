@@ -4,14 +4,10 @@ import { radius, spacing } from '../theme/spacing'
 
 type Props = {
   visible: boolean
-  /** Krótki komunikat dla użytkownika (np. „Logowanie…”). */
+  
   message: string
 }
 
-/**
- * Pełnoekranowe tło blokujące interakcję podczas operacji auth (logowanie / wylogowanie),
- * żeby nie wyglądało na „zawieszoną” aplikację.
- */
 export function AuthBlockingOverlay({ visible, message }: Props) {
   return (
     <Modal

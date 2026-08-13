@@ -14,7 +14,7 @@ import {
   writeBatch,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage'
+import { uploadLocalFileToStorage } from './storageUploadNative'
 import {
   createUserWithEmailAndPassword,
   deleteUser,
@@ -40,15 +40,11 @@ import {
 } from '../utils/publicIds'
 import { normalizeNipInput, nipValidationError, normalizedKrsDigits, krsValidationErrorOptional } from '../utils/polishOrgIds'
 import { ORG_REGISTRATION_STATUT_OPTIONAL } from '../config/featureFlags'
-import { getFirebaseAuth, getFirebaseDb, getFirebaseStorage } from './client'
+import { getFirebaseAuth, getFirebaseDb } from './client'
 import type { UserRole as AuthRole } from './adminAuth'
 
 const db = () => getFirebaseDb()
 
-/**
- * Konto organizacji bez wpisu organizations (np. ręczny dokument users lub stara wersja app)
- * nie trafia na listę panelu admina. Przy następnym pobraniu profilu dopisujemy brakujący wpis kolejki weryfikacji.
- */
 async function syncMissingOrganizationsQueueDoc(
   uid: string,
   userData: Record<string, unknown>,
@@ -123,7 +119,7 @@ export async function fetchUserProfile(userId: string): Promise<StoredUser | nul
     } else if (ovs === 'pending' || ovs === 'approved' || ovs === 'rejected') {
       orgVerificationStatus = ovs
     } else {
-      /** Brak wpisu organizations — konto sprzed kolejki weryfikacji; nie blokuj publikacji. */
+      
       orgVerificationStatus = orgSnap.exists() ? 'pending' : 'approved'
     }
   }
@@ -131,14 +127,39 @@ export async function fetchUserProfile(userId: string): Promise<StoredUser | nul
   const interestsParsed = Array.isArray(rawInt)
     ? rawInt.map((x) => String(x)).filter((s) => s.trim().length > 0)
     : []
-  /** Wolontariusz: zawsze tablica (także []), żeby zapis z edycji profilu wracał do widoku. */
+  
   const interests = role === 'volunteer' ? interestsParsed : undefined
   let orgVerificationRejectionReason: string | undefined
+  let orgNip: string | undefined
+  let orgKrs: string | undefined
+  let orgStatutLabel: string | undefined
+  let orgStatutUrl: string | undefined
   if (role === 'organization' && orgSnap.exists()) {
     const od = orgSnap.data() as Record<string, unknown>
     const raw = od.verificationRejectionReason
     const t = typeof raw === 'string' ? raw.trim() : ''
     orgVerificationRejectionReason = t.length > 0 ? t : undefined
+
+    const nipRaw = String(od.nip ?? '').trim()
+    const krsRaw = String(od.krs ?? '').trim()
+    orgNip = nipRaw.length > 0 ? nipRaw : undefined
+    orgKrs = krsRaw.length > 0 ? krsRaw : undefined
+
+    const pliki = Array.isArray(od.dokumentyPliki) ? od.dokumentyPliki : []
+    for (const item of pliki) {
+      if (!item || typeof item !== 'object') continue
+      const row = item as { tytul?: unknown; podtytul?: unknown }
+      const pod = typeof row.podtytul === 'string' ? row.podtytul.trim() : ''
+      if (!pod) continue
+      const tytul = typeof row.tytul === 'string' && row.tytul.trim() ? row.tytul.trim() : 'Statut organizacji'
+      if (/^https?:\/\//i.test(pod)) {
+        orgStatutUrl = pod
+        orgStatutLabel = tytul
+      } else {
+        orgStatutLabel = pod
+      }
+      break
+    }
   }
   const savedPid = typeof d.accountPublicId === 'string' ? String(d.accountPublicId).trim() : ''
   const derivedPid = publicIdForFirebaseUser(userId, role)
@@ -159,6 +180,10 @@ export async function fetchUserProfile(userId: string): Promise<StoredUser | nul
     interests,
     orgVerificationStatus,
     orgVerificationRejectionReason,
+    orgNip,
+    orgKrs,
+    orgStatutLabel,
+    orgStatutUrl,
   }
 }
 
@@ -233,7 +258,7 @@ function moderatedAtIsoFromFirestore(raw: unknown): string | undefined | null {
     try {
       return o.toDate().toISOString()
     } catch {
-      /* fall through */
+      
     }
   }
   if (typeof o?.seconds === 'number') {
@@ -267,7 +292,6 @@ function complaintFromDoc(id: string, d: Record<string, unknown>): Complaint {
   }
 }
 
-/** Ogłoszenia widoczne dla wolontariuszy — odczyt bez logowania (zgodnie z regułami Firestore). */
 export function subscribePublicVolunteerListingsFirebase(
   onListings: (items: Ogloszenie[]) => void,
   onError?: () => void,
@@ -285,7 +309,6 @@ export function subscribePublicVolunteerListingsFirebase(
   )
 }
 
-/** Subskrypcja danych z Firestore: zgłoszenia, ogłoszenia, powiadomienia, skargi. */
 export function subscribeMvpStateFirebase(
   userId: string,
   role: 'volunteer' | 'organization',
@@ -381,10 +404,10 @@ export async function firebaseRegisterAppUser(data: {
   displayName: string
   phone: string
   organizationName?: string
-  /** Tylko rola organization — oczyszczany NIP przed walidacją. */
+  
   organizationNip?: string
   organizationKrs?: string
-  /** Wybrany plik statutu (PDF / obraz), przesłany do Storage po utworzeniu konta Auth. */
+  
   statutAsset?: { uri: string; name: string; mimeType?: string | null } | null
 }): Promise<{ ok: true; user: User } | { ok: false; message: string }> {
   const key = data.email.trim().toLowerCase()
@@ -432,7 +455,7 @@ export async function firebaseRegisterAppUser(data: {
         try {
           await deleteUser(cred.user)
         } catch {
-          /* ignore */
+          
         }
         return {
           ok: false,
@@ -489,7 +512,7 @@ export async function firebaseRegisterAppUser(data: {
       try {
         await deleteUser(cred.user)
       } catch {
-        /* ignore — i nie blokuj pierwotnego błędu */
+        
       }
       throw commitErr
     }
@@ -560,7 +583,7 @@ export async function firebaseLoginAppUser(
         }
       }
     } catch {
-      /** Sieć / Firestore przy starcie logowania — pozwól przejść; sesja zweryfikuje się przy ładowaniu profilu. */
+      
     }
     return { ok: true }
   } catch (e: unknown) {
@@ -596,10 +619,6 @@ export async function firebaseLogoutAppUser(): Promise<void> {
   await signOut(getFirebaseAuth())
 }
 
-/**
- * Po odrzuceniu przez admina — organizacja ponownie trafia do kolejki (`pending`) bez usuwania konta.
- * Ogłoszenia pozostają z `visibleToVolunteers: false` do czasu ponownego zatwierdzenia.
- */
 export async function firebaseResubmitOrganizationVerification(
   ownerUid: string,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
@@ -663,16 +682,32 @@ export async function firebaseResubmitOrganizationVerification(
 export type FirebaseProfilePatch = Partial<
   Pick<StoredUser, 'displayName' | 'phone' | 'about' | 'city' | 'organizationName' | 'interests'>
 > & {
-  /** `null` lub `''` — usuwa zdjęcie w Firestore */
+  
   avatarUri?: string | null
+  
+  organizationNip?: string
+  organizationKrs?: string
+  statutAsset?: { uri: string; name: string; mimeType?: string | null } | null
+}
+
+function storageUploadErrorMessage(e: unknown): string {
+  const { code } = extractFirebaseErr(e)
+  if (code === 'storage/unauthorized' || code === 'storage/unauthenticated') {
+    return 'Brak uprawnień do przesłania pliku. Opublikuj reguły z pliku mobile/storage.rules w Firebase Console → Storage → Reguły.'
+  }
+  if (code === 'storage/object-not-found') {
+    return 'Nie znaleziono pliku w Storage. Sprawdź EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET w pliku .env.'
+  }
+  if (code === 'storage/quota-exceeded') {
+    return 'Przekroczono limit miejsca w Firebase Storage.'
+  }
+  if (e instanceof Error && e.message) return e.message
+  return 'Nie udało się przesłać pliku. Sprawdź połączenie i reguły Firebase Storage.'
 }
 
 async function uploadOrganizationStatut(uid: string, uri: string, mimeType: string | undefined): Promise<string> {
-  const storage = getFirebaseStorage()
-  const res = await fetch(uri)
-  const blob = await res.blob()
-  const mt = (mimeType || blob.type || 'application/octet-stream').trim()
-  const lower = mt.toLowerCase()
+  const hint = (mimeType || 'application/octet-stream').trim()
+  const lower = hint.toLowerCase()
   let ext = 'bin'
   if (lower === 'application/pdf' || lower.endsWith('/pdf')) ext = 'pdf'
   else if (lower.startsWith('image/jpeg')) ext = 'jpg'
@@ -680,21 +715,24 @@ async function uploadOrganizationStatut(uid: string, uri: string, mimeType: stri
   else if (lower.startsWith('image/webp')) ext = 'webp'
   else if (lower.startsWith('image/')) ext = lower.replace('image/', '').split('+')[0] || 'jpg'
 
-  const maxBytes = 15 * 1024 * 1024
-  if (blob.size > maxBytes) throw new Error('Za duży plik.')
-
-  const objectRef = storageRef(storage, `orgDocs/${uid}/statut.${ext}`)
-  await uploadBytes(objectRef, blob, { contentType: mt })
-  return getDownloadURL(objectRef)
+  try {
+    return await uploadLocalFileToStorage(
+      `orgDocs/${uid}/statut.${ext}`,
+      uri,
+      hint,
+      15 * 1024 * 1024,
+    )
+  } catch (e) {
+    throw new Error(storageUploadErrorMessage(e))
+  }
 }
 
 async function firebaseUploadUserAvatar(userId: string, imageUri: string): Promise<string> {
-  const storage = getFirebaseStorage()
-  const objectRef = storageRef(storage, `avatars/${userId}.jpg`)
-  const res = await fetch(imageUri)
-  const blob = await res.blob()
-  await uploadBytes(objectRef, blob, { contentType: blob.type && blob.type.startsWith('image/') ? blob.type : 'image/jpeg' })
-  return getDownloadURL(objectRef)
+  try {
+    return await uploadLocalFileToStorage(`avatars/${userId}.jpg`, imageUri, 'image/jpeg', 4 * 1024 * 1024)
+  } catch (e) {
+    throw new Error(storageUploadErrorMessage(e))
+  }
 }
 
 export async function firebaseUpdateUserProfile(userId: string, partial: FirebaseProfilePatch): Promise<void> {
@@ -727,8 +765,48 @@ export async function firebaseUpdateUserProfile(userId: string, partial: Firebas
       payload.avatarUrl = await firebaseUploadUserAvatar(userId, partial.avatarUri)
     }
   }
-  if (Object.keys(payload).length === 0) return
-  await setDoc(userRef, payload, { merge: true })
+  if (Object.keys(payload).length > 0) {
+    await setDoc(userRef, payload, { merge: true })
+  }
+
+  const orgRef = doc(db(), 'organizations', userId)
+  const orgSnap = await getDoc(orgRef)
+  if (!orgSnap.exists()) return
+
+  const orgUpdate: Record<string, unknown> = {}
+  const prevDok = (orgSnap.data() as { dokumenty?: Record<string, unknown> }).dokumenty ?? {}
+  let dokumenty: Record<string, unknown> | undefined
+
+  if (partial.organizationNip !== undefined) {
+    const nipDigits = normalizeNipInput(partial.organizationNip)
+    orgUpdate.nip = nipDigits
+    dokumenty = { ...prevDok, ...(dokumenty ?? {}), nip: nipDigits.length > 0 }
+  }
+  if (partial.organizationKrs !== undefined) {
+    const krsDigits = normalizedKrsDigits(partial.organizationKrs)
+    orgUpdate.krs = krsDigits
+    dokumenty = { ...prevDok, ...(dokumenty ?? {}), krs: krsDigits.length > 0 }
+  }
+  if (partial.statutAsset?.uri) {
+    const statutUrl = await uploadOrganizationStatut(
+      userId,
+      partial.statutAsset.uri,
+      partial.statutAsset.mimeType ?? undefined,
+    )
+    orgUpdate.dokumentyPliki = [{ tytul: 'Statut organizacji', podtytul: statutUrl }]
+    dokumenty = { ...prevDok, ...(dokumenty ?? {}), statut: true }
+  }
+  if (partial.organizationName !== undefined) {
+    orgUpdate.nazwa = partial.organizationName || ''
+  }
+  if (partial.phone !== undefined) {
+    orgUpdate.telefon = partial.phone
+  }
+  if (dokumenty) orgUpdate.dokumenty = dokumenty
+
+  if (Object.keys(orgUpdate).length > 0) {
+    await setDoc(orgRef, orgUpdate, { merge: true })
+  }
 }
 
 async function addVolunteerNotification(userId: string, n: Omit<InAppNotification, 'id'> & { id?: string }): Promise<void> {
@@ -831,12 +909,6 @@ export async function firebaseAcceptApplication(
   }
 }
 
-/**
- * Jeśli do danego ogłoszenia nie ma już zgłoszeń oczekujących ani zaakceptowanych
- * — ustaw dokument ogłoszenia na `status: Zakończone`.
- * Odczyt zapytań tylko po `organizerUid` (wszystkie zgłoszenia organizacji — filtrowanie po ogłoszeniu w kodzie),
- * żeby uniknąć dodatkowych indeksów złożonych.
- */
 async function firebaseMaybeFinalizeListingDocument(orgUid: string, listingId: string): Promise<void> {
   const listingIdTrim = listingId.trim()
   if (!listingIdTrim) return
@@ -896,7 +968,7 @@ export async function firebaseCompleteApplication(
     }
   }
   if (d.ogloszenieId?.trim()) {
-    /** `firebaseMaybeFinalizeListingDocument` sama sprawdza `createdByUid` dokumentu ogłoszenia. */
+    
     await firebaseMaybeFinalizeListingDocument(orgUid, String(d.ogloszenieId))
   }
 }
@@ -920,7 +992,7 @@ export async function firebaseAddOgloszenie(
     organizerNip = ids.nip
     organizerKrs = ids.krs
   } catch {
-    /** Brak kolejki organizations / brak uprawnień — publikacja bez snapshotu NIP/KRS. */
+    
   }
   const o: Ogloszenie = {
     id,
@@ -960,10 +1032,6 @@ export async function firebaseDeleteOgloszenie(ownerUid: string, listingId: stri
   await deleteDoc(ref)
 }
 
-/**
- * Ukrywa ogłoszenie z widoku wolontariuszy (archiwum) lub przywraca publikację.
- * Nie edytuje treści — według reguł Firestore tylko `archived` + `visibleToVolunteers`.
- */
 export async function firebaseSetListingArchived(
   ownerUid: string,
   listingId: string,
@@ -999,7 +1067,7 @@ export async function firebaseFileComplaint(
     moderatedAt: null,
   })
 
-  /** Potwierdzenie w zakładce „Wiadomości” — działa na regule `request.auth.uid == userId` (własne powiadomienie). */
+  
   try {
     const nid = localUid()
     await addVolunteerNotification(reporterUid, {

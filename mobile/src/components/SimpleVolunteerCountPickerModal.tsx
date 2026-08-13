@@ -3,7 +3,6 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { colors } from '../theme/colors'
 import { radius, spacing } from '../theme/spacing'
 
-/** Liczba w stylu „3 osoby”, „5 osób” (zgodnie z polską odmianą). */
 export function formatVolunteerCount(n: number): string {
   const x = Math.min(99, Math.max(1, Math.round(n)))
   if (x === 1) return '1 osoba'

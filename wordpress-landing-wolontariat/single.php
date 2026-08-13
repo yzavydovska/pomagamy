@@ -26,7 +26,7 @@ get_header();
 					$blog_home = wolontariat_landing_get_posts_page_url();
 					if ($blog_home) {
 						echo ' · ';
-						echo '<a href="' . esc_url($blog_home) . '">' . esc_html__('Wszystkie wpisy', 'wolontariat-landing') . '</a>';
+						echo '<a href="' . esc_url($blog_home) . '">' . esc_html('Wszystkie wpisy') . '</a>';
 					}
 				}
 				?>

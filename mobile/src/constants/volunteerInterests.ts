@@ -1,4 +1,4 @@
-/** Zainteresowania wolontariusza — wybór w edycji profilu; w profilu widać tylko zaznaczone. */
+
 export const VOLUNTEER_INTEREST_OPTIONS = [
   'Zwierzęta',
   'Seniorzy',

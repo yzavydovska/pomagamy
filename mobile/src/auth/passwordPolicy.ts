@@ -1,4 +1,4 @@
-/** Minimalne wymagania bezpieczeństwa hasła przy rejestracji. */
+
 export function validatePasswordStrength(password: string): { ok: true } | { ok: false; message: string } {
   if (password.length < 8) {
     return { ok: false, message: 'Hasło musi mieć co najmniej 8 znaków.' }

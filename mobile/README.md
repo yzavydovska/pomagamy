@@ -1,32 +1,52 @@
 # PomagaMY — aplikacja mobilna (Expo)
 
-**Aktualny zakres:** ta wersja produktu jest **przeznaczona wyłącznie na Androida** — budowanie testów na emulatorze lub urządzeniu oraz docelową dystrybucję zakładamy dla **Android**, nie dla iOS ani przeglądarki (`web`). Skrypty i konfiguracja Expo mogą nadal zawierać pola techniczne pod inne platformy; nie oznacza to wsparcia w pierwszym wydaniu.
+
+
+**Zakres:** pierwsza wersja produktowa pod **Android** (bez iOS ani `web`).
+
+
 
 ## Wymagania
 
+
+
 - Node.js + npm  
-- Android Studio / SDK (do `npm run android` i emulatora) lub fizyczny telefon Android z deweloperskim lub **development buildiem** Expo
+
+- Android Studio / SDK (np. `npm run android`) lub telefon Android z **development buildem** Expo
+
+
 
 ## Konfiguracja
 
+
+
 1. `npm install`
-2. Skopiuj `mobile/.env.example` → `mobile/.env` i uzupełnij klucze Firebase (szczegóły: `FIREBASE_SETUP.md`).
+
+2. Skopiuj **`.env.example`** → **`.env`** w tym katalogu. Wartości `EXPO_PUBLIC_FIREBASE_*` weź z Firebase Console (**Project settings** → aplikacja **Web** → konfiguracja SDK). Bez `.env` aplikacja startuje w trybie demo (`firestore.rules` w repo musisz wdrożyć samodzielnie w konsoli Firebase).
+
+
 
 ## Uruchomienie (Android)
 
+
+
 ```bash
+
 npm run start       # Metro + dev client
-npm run android     # kompilacja / uruchomienie na Androidzie (expo run:android)
+
+npm run android     # expo run:android
+
 ```
 
-Do szybkich testów aplikacji w **Expo Go** (telefon Android) można użyć `npm run start:go`.
 
-## Produkcja i inne platformy
 
-iOS i strona WWW **nie są** w zakresie bieżącej pracy nad aplikacją — dodanie ich będzie osobnym etapem.
+Szybki podgląd w **Expo Go:** `npm run start:go`.
 
-## Historia zmian na GitHub
 
-- **`CHANGELOG.md`** — zestaw zmian oraz **indeks rozdzielonych tematów (01–09)** z linkami do [`docs/podsumowanie/`](docs/podsumowanie/).
-- Karty **`01` … `09`** w `podsumowanie/` można dopisywać **osobnymi commitami**, żeby na GitHubie było wiele czytelnych wpisów w historii.
-- **`docs/git-pushy-kroki.md`** — jak często robić commity oraz kiedy synchronizować repozytorium tylko‑mobile (`pomagaMY_APP`).
+
+## Produkcja
+
+
+
+iOS i WWW — poza zakresem bieżącej aplikacji.
+

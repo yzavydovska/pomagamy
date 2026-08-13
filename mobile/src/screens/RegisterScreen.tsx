@@ -52,7 +52,7 @@ export function RegisterScreen({ navigation }: Props) {
 
   const pickStatut = async () => {
     try {
-      /** Dynamiczny import — inaczej stary dev build bez natywnego kodu wywala całą aplikację przy starcie. */
+      
       const DocumentPicker = await import('expo-document-picker')
       const res = await DocumentPicker.getDocumentAsync({
         copyToCacheDirectory: true,

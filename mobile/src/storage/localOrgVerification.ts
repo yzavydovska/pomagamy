@@ -1,7 +1,4 @@
-/**
- * Weryfikacja organizacji przy trybie bez Firebase — kolejka i status trzymane w rejestrze użytkowników
- * oraz widoczność ogłoszeń (pole visibleToVolunteers na dokumentach MVP).
- */
+
 import type { OrganizacjaDoWeryfikacji } from '../data/adminMock'
 import type { StoredUser } from '../types/mvp'
 import { loadMvpState, loadRegistry, saveMvpState, saveRegistry, type UserRegistry } from './mvpPersistence'
@@ -55,7 +52,6 @@ export async function loadOrganizationsLocalByVerification(
   return out
 }
 
-/** @deprecated Użyj loadOrganizationsLocalByVerification('pending') */
 export async function loadPendingOrganizationsLocal(): Promise<OrganizacjaDoWeryfikacji[]> {
   return loadOrganizationsLocalByVerification('pending')
 }

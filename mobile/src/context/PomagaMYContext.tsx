@@ -6,9 +6,12 @@ import {
   useMemo,
   useRef,
   useState,
+  type Dispatch,
+  type MutableRefObject,
   type ReactNode,
+  type SetStateAction,
 } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, type User } from 'firebase/auth'
 import { ogloszenia as staticOgloszenia } from '../data/ogloszenia'
 import type { Ogloszenie } from '../types/ogloszenie'
 import type {
@@ -70,16 +73,13 @@ type PomagaMYContextValue = {
   ready: boolean
   session: StoredUser | null
   mvp: MvpPersistedState
-  /** Dane z serwera (konto) lub zapisane na urządzeniu. */
+  
   dataSource: 'firebase' | 'local'
-  /** Ogłoszenia widoczne w tej sesji (łączone wg źródła danych). */
+  
   allOgloszenia: Ogloszenie[]
-  /** Spinner warstwowy dla operacji uwierzytelniających (logowanie / wylogowanie). */
+  
   authOverlay: { visible: boolean; message: string }
-  /**
-   * Pokaż pełny ekran ładowania na czas wywołania `fn`.
-   * Użyj przy logowaniu lub innych blokujących krokach, żeby UI nie sprawiał wrażenia zawieszenia.
-   */
+  
   runWithAuthOverlay: (message: string, fn: () => Promise<void>) => Promise<void>
   login: (email: string, password: string) => Promise<{ ok: true } | { ok: false; message: string }>
   register: (data: {
@@ -99,6 +99,9 @@ type PomagaMYContextValue = {
       Pick<StoredUser, 'displayName' | 'phone' | 'about' | 'city' | 'organizationName' | 'interests'>
     > & {
       avatarUri?: string | null
+      organizationNip?: string
+      organizationKrs?: string
+      statutAsset?: { uri: string; name: string; mimeType?: string | null } | null
     },
   ) => Promise<void>
   submitApplication: (ogloszenie: Ogloszenie) => Promise<{ ok: true } | { ok: false; message: string }>
@@ -113,13 +116,13 @@ type PomagaMYContextValue = {
     },
   ) => Promise<Ogloszenie>
   deleteOgloszenie: (listingId: string) => Promise<void>
-  /** Ukrycie z widoku wolontariuszy (archiwum) lub przywrócenie według weryfikacji konta. */
+  
   setListingArchived: (listingId: string, archived: boolean) => Promise<void>
   fileComplaint: (c: Omit<Complaint, 'id' | 'createdAt' | 'reporterEmail' | 'reporterUid'> & { reporterEmail?: string }) => Promise<void>
   markNotificationRead: (id: string) => Promise<void>
   markAllNotificationsRead: () => Promise<void>
   refresh: () => Promise<void>
-  /** Po odrzuceniu weryfikacji przez admina — ponowne `pending` (Firebase + tryb lokalny). */
+  
   requestOrgVerificationResubmit: () => Promise<{ ok: true } | { ok: false; message: string }>
 }
 
@@ -144,7 +147,7 @@ function migrateLocalPersisted(
       reg[email] = { ...u, publicId: generateLocalAccountPublicId(u.role) }
       changed = true
     }
-    /** Konto organizacji sprzed weryfikacji — bez pola uznajemy za już zatwierdzone (kompatybilność). */
+    
     if (u.role === 'organization' && u.orgVerificationStatus === undefined) {
       reg[email] = { ...reg[email], orgVerificationStatus: 'approved' }
       changed = true
@@ -190,6 +193,75 @@ const emptyMvp = (): MvpPersistedState => ({
   complaints: [],
 })
 
+type CloudHydrationRefs = {
+  mvpUnsubRef: MutableRefObject<(() => void) | null>
+  publicListingsUnsubRef: MutableRefObject<(() => void) | null>
+}
+
+type CloudHydrationSetters = {
+  setSession: Dispatch<SetStateAction<StoredUser | null>>
+  setMvp: Dispatch<SetStateAction<MvpPersistedState>>
+}
+
+function attachPublicVolunteerListingFeed(
+  setMvp: CloudHydrationSetters['setMvp'],
+): () => void {
+  return subscribePublicVolunteerListingsFirebase((items) => {
+    setMvp((prev) => ({ ...prev, customOgloszenia: items }))
+  })
+}
+
+async function hydrateCloudSessionFromFirebaseUser(
+  user: User | null,
+  refs: CloudHydrationRefs,
+  setters: CloudHydrationSetters,
+  onReadyComplete?: () => void,
+): Promise<void> {
+  const { mvpUnsubRef, publicListingsUnsubRef } = refs
+  const { setSession, setMvp } = setters
+
+  mvpUnsubRef.current?.()
+  mvpUnsubRef.current = null
+  publicListingsUnsubRef.current?.()
+  publicListingsUnsubRef.current = null
+
+  try {
+    if (!user) {
+      setSession(null)
+      setMvp(emptyMvp())
+      publicListingsUnsubRef.current = attachPublicVolunteerListingFeed(setMvp)
+      return
+    }
+
+    const role = await fetchUserRole(user.uid)
+    if (role === 'admin' || (role !== 'volunteer' && role !== 'organization')) {
+      setSession(null)
+      setMvp(emptyMvp())
+      return
+    }
+
+    const profile = await fetchUserProfile(user.uid)
+    if (!profile) {
+      setSession(null)
+      setMvp(emptyMvp())
+      return
+    }
+
+    if (profile.accountSuspended === true) {
+      await firebaseLogoutAppUser()
+      setSession(null)
+      setMvp(emptyMvp())
+      publicListingsUnsubRef.current = attachPublicVolunteerListingFeed(setMvp)
+      return
+    }
+
+    setSession(profile)
+    mvpUnsubRef.current = subscribeMvpStateFirebase(user.uid, role, setMvp)
+  } finally {
+    onReadyComplete?.()
+  }
+}
+
 export function PomagaMYProvider({ children }: { children: ReactNode }) {
   const useCloud = isFirebaseConfigured()
   const [ready, setReady] = useState(false)
@@ -207,7 +279,7 @@ export function PomagaMYProvider({ children }: { children: ReactNode }) {
     try {
       await fn()
     } finally {
-      /** Krótka zwłoka zmniega „mruganie”, gdy nawigacja przełączy się zaraz po zakończeniu. */
+      
       await new Promise<void>((resolve) => setTimeout(resolve, 180))
       setAuthOverlay({ visible: false, message: '' })
     }
@@ -217,32 +289,11 @@ export function PomagaMYProvider({ children }: { children: ReactNode }) {
     if (useCloud) {
       const auth = getFirebaseAuth()
       const u = auth.currentUser
-      if (!u) {
-        setSession(null)
-        setMvp(emptyMvp())
-        publicListingsUnsubRef.current?.()
-        publicListingsUnsubRef.current = subscribePublicVolunteerListingsFirebase((items) => {
-          setMvp((prev) => ({ ...prev, customOgloszenia: items }))
-        })
-        return
-      }
-      const role = await fetchUserRole(u.uid)
-      if (role === 'admin' || (role !== 'volunteer' && role !== 'organization')) {
-        setSession(null)
-        return
-      }
-      const profile = await fetchUserProfile(u.uid)
-      if (profile?.accountSuspended === true) {
-        await firebaseLogoutAppUser()
-        setSession(null)
-        setMvp(emptyMvp())
-        publicListingsUnsubRef.current?.()
-        publicListingsUnsubRef.current = subscribePublicVolunteerListingsFirebase((items) => {
-          setMvp((prev) => ({ ...prev, customOgloszenia: items }))
-        })
-        return
-      }
-      if (profile) setSession(profile)
+      await hydrateCloudSessionFromFirebaseUser(
+        u,
+        { mvpUnsubRef, publicListingsUnsubRef },
+        { setSession, setMvp },
+      )
       return
     }
     const [registry, email, mvpState] = await Promise.all([
@@ -278,53 +329,12 @@ export function PomagaMYProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!useCloud) return
     const auth = getFirebaseAuth()
-    const unsubAuth = onAuthStateChanged(auth, async (user) => {
-      mvpUnsubRef.current?.()
-      mvpUnsubRef.current = null
-      publicListingsUnsubRef.current?.()
-      publicListingsUnsubRef.current = null
-      if (!user) {
-        setSession(null)
-        setMvp(emptyMvp())
-        publicListingsUnsubRef.current = subscribePublicVolunteerListingsFirebase((items) => {
-          setMvp((prev) => ({ ...prev, customOgloszenia: items }))
-        })
-        setReady(true)
-        return
-      }
-      try {
-        const role = await fetchUserRole(user.uid)
-        if (role === 'admin') {
-          setSession(null)
-          setMvp(emptyMvp())
-          return
-        }
-        if (role !== 'volunteer' && role !== 'organization') {
-          setSession(null)
-          setMvp(emptyMvp())
-          return
-        }
-        const profile = await fetchUserProfile(user.uid)
-        if (!profile) {
-          setSession(null)
-          setMvp(emptyMvp())
-          return
-        }
-        if (profile.accountSuspended === true) {
-          await firebaseLogoutAppUser()
-          setSession(null)
-          setMvp(emptyMvp())
-          publicListingsUnsubRef.current = subscribePublicVolunteerListingsFirebase((items) => {
-            setMvp((prev) => ({ ...prev, customOgloszenia: items }))
-          })
-          return
-        }
-        setSession(profile)
-        const unsubMvp = subscribeMvpStateFirebase(user.uid, role, setMvp)
-        mvpUnsubRef.current = unsubMvp
-      } finally {
-        setReady(true)
-      }
+    const cloudRefs = { mvpUnsubRef, publicListingsUnsubRef }
+    const cloudSetters = { setSession, setMvp }
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      void hydrateCloudSessionFromFirebaseUser(user, cloudRefs, cloudSetters, () =>
+        setReady(true),
+      )
     })
     return () => {
       unsubAuth()
@@ -459,9 +469,22 @@ export function PomagaMYProvider({ children }: { children: ReactNode }) {
         Pick<StoredUser, 'displayName' | 'phone' | 'about' | 'city' | 'organizationName' | 'interests'>
       > & {
         avatarUri?: string | null
+        organizationNip?: string
+        organizationKrs?: string
+        statutAsset?: { uri: string; name: string; mimeType?: string | null } | null
       },
     ) => {
       if (!session) return
+      if (session.role === 'organization') {
+        if (partial.organizationNip !== undefined) {
+          const nipErr = nipValidationError(partial.organizationNip)
+          if (nipErr) throw new Error(nipErr)
+        }
+        if (partial.organizationKrs !== undefined) {
+          const krsErr = krsValidationErrorOptional(partial.organizationKrs)
+          if (krsErr) throw new Error(krsErr)
+        }
+      }
       if (useCloud) {
         const u = getFirebaseAuth().currentUser
         if (!u) return
@@ -481,6 +504,16 @@ export function PomagaMYProvider({ children }: { children: ReactNode }) {
       if (partial.city !== undefined) merged.city = partial.city
       if (partial.organizationName !== undefined) merged.organizationName = partial.organizationName
       if (partial.interests !== undefined) merged.interests = [...partial.interests]
+      if (partial.organizationNip !== undefined) {
+        merged.orgNip = normalizeNipInput(partial.organizationNip)
+      }
+      if (partial.organizationKrs !== undefined) {
+        merged.orgKrs = normalizedKrsDigits(partial.organizationKrs)
+      }
+      if (partial.statutAsset?.name) {
+        merged.orgStatutLabel = partial.statutAsset.name.trim()
+        delete merged.orgStatutUrl
+      }
       if (partial.avatarUri !== undefined) {
         if (partial.avatarUri === null || partial.avatarUri === '') {
           delete merged.avatarUri

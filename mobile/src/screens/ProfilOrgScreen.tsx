@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Alert, ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -8,6 +8,7 @@ import { usePomagaMY } from '../context/PomagaMYContext'
 import { ProfileAvatarCircle } from '../components/ProfileAvatarCircle'
 import { CopyableIdRow } from '../components/CopyableIdRow'
 import { ProfileIncompleteNotice } from '../components/ProfileIncompleteNotice'
+import { formatKrsForDisplay, formatNipForDisplay } from '../utils/polishOrgIds'
 import { colors } from '../theme/colors'
 import { radius, spacing } from '../theme/spacing'
 
@@ -17,7 +18,6 @@ function useRootNavigation() {
   while (p?.getParent()) p = p.getParent()
   return p as unknown as NativeStackNavigationProp<RootStackParamList>
 }
-
 
 export function ProfilOrgScreen() {
   const insets = useSafeAreaInsets()
@@ -38,6 +38,10 @@ export function ProfilOrgScreen() {
 
   const v = session.orgVerificationStatus
   const rejectionFromAdmin = (session.orgVerificationRejectionReason ?? '').trim()
+  const hasLegalData = Boolean(
+    session.orgNip?.trim() || session.orgKrs?.trim() || session.orgStatutLabel?.trim() || session.orgStatutUrl?.trim(),
+  )
+  const statutDisplay = session.orgStatutLabel?.trim() || (session.orgStatutUrl ? 'Statut organizacji' : '')
 
   return (
     <ScrollView
@@ -139,6 +143,32 @@ export function ProfilOrgScreen() {
         <Row label="Telefon" value={session.phone || '—'} />
         <Row label="Osoba kontaktowa" value={session.displayName || '—'} />
         <Row label="Miasto" value={session.city || '—'} last />
+      </View>
+
+      <View style={styles.block}>
+        <Text style={styles.blockTitle}>Dane prawne</Text>
+        <Row label="NIP" value={formatNipForDisplay(session.orgNip)} />
+        <Row label="KRS" value={formatKrsForDisplay(session.orgKrs)} />
+        {statutDisplay ? (
+          session.orgStatutUrl ? (
+            <Pressable
+              style={[styles.row, styles.rowLine]}
+              onPress={() => void Linking.openURL(session.orgStatutUrl!).catch(() => {})}
+            >
+              <Text style={styles.rowLabel}>Statut</Text>
+              <Text style={[styles.rowValue, styles.linkValue]}>{statutDisplay}</Text>
+            </Pressable>
+          ) : (
+            <Row label="Statut" value={statutDisplay} />
+          )
+        ) : (
+          <Row label="Statut" value="Nie dodano — uzupełnij w edycji profilu." last />
+        )}
+        {!hasLegalData ? (
+          <Text style={styles.legalHint}>
+            NIP i statut podajesz przy rejestracji lub w edycji profilu. Administrator używa ich przy weryfikacji konta.
+          </Text>
+        ) : null}
       </View>
 
       <View style={styles.block}>
@@ -276,6 +306,8 @@ const styles = StyleSheet.create({
   rowLine: { borderBottomWidth: 1, borderBottomColor: colors.border },
   rowLabel: { color: colors.textMuted, fontSize: 14 },
   rowValue: { color: colors.text, fontWeight: '600', flex: 1, textAlign: 'right' },
+  linkValue: { color: colors.primary, textDecorationLine: 'underline' },
+  legalHint: { fontSize: 13, lineHeight: 19, color: colors.textMuted, marginTop: spacing.sm },
   about: { color: colors.textMuted, lineHeight: 24 },
   btnPrimary: {
     marginHorizontal: spacing.lg,

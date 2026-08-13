@@ -39,3 +39,11 @@ yarn-error.*
 
 # Duże archiwa motywu (jeśli trzymasz tylko rozpakowany folder WP)
 *.zip
+
+# Materiały poza kodem aplikacji (zostają lokalnie, nie na GitHub)
+arkusze-moscow/
+figma/
+raporty/
+dokumentacja-projektu/
+prezentacja-obrona/
+MOSCOW-*

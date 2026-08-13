@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import type { RootStackParamList } from '../navigation/types'
 import { persistAdminSession } from '../auth/adminSession'
@@ -21,7 +21,6 @@ import { radius, spacing } from '../theme/spacing'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AdminLogin'>
 
-/** Przy Firebase admin loguje się przez zwykły ekran «Logowanie» — tu zostaje tylko tryb bez Firebase (sesja lokalna). */
 export function AdminLoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -44,9 +43,8 @@ export function AdminLoginScreen({ navigation }: Props) {
           </View>
           <Text style={styles.h1}>Jedno logowanie</Text>
           <Text style={styles.sub}>
-            Administrator loguje się przez główny ekran «Zaloguj się» — ten sam adres e-mail i hasło co przy koncie Firebase. W Firestore dokument{' '}
-            <Text style={styles.mono}>users/[uid]</Text> musi mieć pole{' '}
-            <Text style={styles.mono}>role: &quot;admin&quot;</Text>.
+            Użyj ikony konta na ekranie głównym i zaloguj się danymi administratora nadanymi przez osobę
+            odpowiedzialną za system — to samo konto wiadomości e-mail i hasło na ekranie «Zaloguj się».
           </Text>
           <Pressable style={styles.btn} onPress={() => navigation.replace('Login')}>
             <Text style={styles.btnText}>Przejdź do logowania</Text>
@@ -150,7 +148,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 15,
   },
-  mono: { fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }) },
   input: {
     backgroundColor: colors.inputBg,
     borderWidth: 1,

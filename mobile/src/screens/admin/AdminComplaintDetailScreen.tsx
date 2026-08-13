@@ -81,7 +81,7 @@ export function AdminComplaintDetailScreen({ navigation, route }: Props) {
     if (params.mode === 'mock') {
       const m = skargiAdmin.find((s) => s.id === params.mockId)
       if (!m) {
-        setErr('Nie znaleziono wpisu demonstracyjnego.')
+        setErr('Nie znaleziono przykładowego wpisu.')
         setLoading(false)
         return
       }
@@ -100,7 +100,7 @@ export function AdminComplaintDetailScreen({ navigation, route }: Props) {
     }
 
     if (!isFirebaseConfigured()) {
-      setErr('Firebase jest wyłączony.')
+      setErr('Brak aktywnej konfiguracji serwera.')
       setLoading(false)
       return
     }
@@ -159,8 +159,6 @@ export function AdminComplaintDetailScreen({ navigation, route }: Props) {
 
   const c = complaint
   const eff = complaintEffectiveModeration(c)
-  const mockNote = params.mode === 'mock' ? ' Lista demonstracyjna (bez Firebase).' : ''
-
   const onSetModeration = (status: ComplaintModerationStatus) => {
     if (params.mode !== 'firebase') return
     const title =
@@ -252,8 +250,7 @@ export function AdminComplaintDetailScreen({ navigation, route }: Props) {
       <AuthHeader title={`Skarga • ${c.refTargetId || c.id.slice(0, 8)}`} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.lead}>{c.category}</Text>
-        {mockNote ? <Text style={styles.mockBanner}>{mockNote.trim()}</Text> : null}
-        <Row label="Id dokumentu Firestore" value={c.id} />
+        <Row label="Identyfikator wpisu" value={c.id} />
         <Row label="Data zgłoszenia" value={formatPlDate(c.createdAt)} />
         <Row label="Cel (identyfikator w sprawie)" value={c.refTargetId || '—'} />
         <Row label="Zgłaszający (e-mail)" value={c.reporterEmail || '—'} />
@@ -269,7 +266,7 @@ export function AdminComplaintDetailScreen({ navigation, route }: Props) {
             {busy ? (
               <ActivityIndicator style={{ marginVertical: spacing.md }} color={colors.primary} />
             ) : null}
-            <Text style={styles.actionsHint}>Zaakceptuj lub odrzuć skargę (tryb Firebase)</Text>
+            <Text style={styles.actionsHint}>Zaakceptuj lub odrzuć skargę</Text>
             <View style={styles.btnRowWrap}>
               <Pressable style={styles.btnNeutral} onPress={() => onSetModeration('pending')}>
                 <Text style={styles.btnNeutralText}>Oczekująca</Text>
@@ -298,8 +295,8 @@ export function AdminComplaintDetailScreen({ navigation, route }: Props) {
               <Text style={styles.btnDangerSolidText}>Zablokuj konto celu (W- / O-)</Text>
             </Pressable>
             <Text style={styles.actionsFoot}>
-              Konta blokowane są w polu „accountSuspended” w Firestore. Odblokowanie wykonasz w dokumentach
-              użytkowników w konsoli Firebase lub przyszłą akcją w panelu.
+              Po zablokowaniu użytkownik nie zaloguje się ponownie. Odblokowanie można ustawić w panelu
+              zarządzania kontami lub po stronie serwisu.
             </Text>
           </View>
         )}
@@ -327,11 +324,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.sm,
     lineHeight: 26,
-  },
-  mockBanner: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginBottom: spacing.md,
   },
   sectionTitle: {
     fontWeight: '800',

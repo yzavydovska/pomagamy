@@ -17,17 +17,14 @@ function parseRoleFromSnap(snap: DocumentSnapshot): UserRole | null {
   }
   return null
 }
+async function refreshAuthTokenForUid(uid: string, force = false): Promise<void> {
+  const me = getFirebaseAuth().currentUser
+  if (me?.uid !== uid) return
+  await me.getIdToken(force).catch(() => undefined)
+}
 
-/**
- * Pierwszy odczyt Firestore tuż po `signIn` bywa nietrafiony (token jeszcze nie zsynchronizowany z klientem / chwilowy błąd sieci).
- * Czekamy na token i przy odrzuconym żądaniu ponawiamy krótko — wtedy nie trzeba logować się drugi raz.
- */
 export async function fetchUserRole(uid: string): Promise<UserRole | null> {
-  const auth = getFirebaseAuth()
-  const me = auth.currentUser
-  if (me?.uid === uid) {
-    await me.getIdToken().catch(() => undefined)
-  }
+  await refreshAuthTokenForUid(uid, true)
 
   const db = getFirebaseDb()
   const ref = doc(db, 'users', uid)
@@ -41,17 +38,23 @@ export async function fetchUserRole(uid: string): Promise<UserRole | null> {
     } catch (e) {
       lastErr = e
       if (i === attempts - 1) break
-      await new Promise<void>((r) => setTimeout(r, 200 * (i + 1)))
-      if (me?.uid === uid) {
-        await me.getIdToken(true).catch(() => undefined)
-      }
+      await new Promise<void>((r) => setTimeout(r, 250 * (i + 1)))
+      await refreshAuthTokenForUid(uid, true)
     }
   }
 
   throw lastErr
 }
 
-/** Logowanie do panelu admina — wymaga konta Firebase Auth + dokumentu users/{uid} z role: "admin". */
+export async function resolveUserRoleAfterLogin(uid: string): Promise<UserRole | null> {
+  await refreshAuthTokenForUid(uid, true)
+  let role = await fetchUserRole(uid)
+  if (role) return role
+  await new Promise<void>((r) => setTimeout(r, 450))
+  await refreshAuthTokenForUid(uid, true)
+  return fetchUserRole(uid)
+}
+
 export async function signInAsAdmin(email: string, password: string): Promise<User> {
   const auth = getFirebaseAuth()
   const cred = await signInWithEmailAndPassword(auth, email.trim(), password)

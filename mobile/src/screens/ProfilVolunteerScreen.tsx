@@ -57,7 +57,7 @@ export function ProfilVolunteerScreen() {
   const completedCount = mvp.applications.filter(
     (a) => a.volunteerEmail === session.email && a.status === 'zakończone',
   ).length
-  /** Tylko wybrane tagi; puste łańcuchy pomijamy; unikalne kolejność zapisu. */
+  
   const selectedInterests = [...new Set((session.interests ?? []).map((t) => t.trim()).filter(Boolean))]
   const pid = session.publicId?.trim()
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, View } from 'react-native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -21,45 +21,65 @@ import { ReportComplaintScreen } from '../screens/ReportComplaintScreen'
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
+async function resolveBootAdminMode(): Promise<'yes' | 'no'> {
+  if (isFirebaseConfigured()) {
+    const auth = getFirebaseAuth()
+    if (typeof auth.authStateReady === 'function') {
+      await auth.authStateReady()
+    }
+    const user = auth.currentUser
+    if (user) {
+      try {
+        const role = await fetchUserRole(user.uid)
+        if (role === 'admin') return 'yes'
+      } catch {
+        
+      }
+    }
+    return 'no'
+  }
+  const local = await getAdminSession()
+  return local ? 'yes' : 'no'
+}
+
 export function RootNavigator() {
   const { ready, session, authOverlay } = usePomagaMY()
   const [adminMode, setAdminMode] = useState<'unknown' | 'yes' | 'no'>('unknown')
+  
+  const bootRouteRef = useRef<keyof RootStackParamList | null>(null)
 
   useEffect(() => {
     let cancelled = false
 
-    if (isFirebaseConfigured()) {
-      const auth = getFirebaseAuth()
-      const unsub = onAuthStateChanged(auth, async (user) => {
-        if (cancelled) return
-        if (user) {
-          try {
-            const role = await fetchUserRole(user.uid)
-            if (role === 'admin') {
-              setAdminMode('yes')
-              return
-            }
-          } catch {
-            // brak sieci / reguł — nie traktuj jako panel admina
-          }
-        }
-        // Przy włączonym Firebase panel admina tylko po zalogowaniu kontem z users/{uid}.role == "admin".
-        // Plik adminSession (tryb bez Firebase) nie może tu otwierać AdminMain — inaczej brak currentUser i zera na dashboardzie.
-        setAdminMode('no')
-      })
-      return () => {
-        cancelled = true
-        unsub()
-      }
+    void (async () => {
+      const mode = await resolveBootAdminMode()
+      if (!cancelled) setAdminMode(mode)
+    })()
+
+    if (!isFirebaseConfigured()) return () => {
+      cancelled = true
     }
 
-    ;(async () => {
-      const local = await getAdminSession()
-      if (!cancelled) setAdminMode(local ? 'yes' : 'no')
-    })()
+    const auth = getFirebaseAuth()
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (cancelled) return
+      if (!user) {
+        setAdminMode('no')
+        return
+      }
+      void (async () => {
+        try {
+          const role = await fetchUserRole(user.uid)
+          if (!cancelled) setAdminMode(role === 'admin' ? 'yes' : 'no')
+        } catch {
+          if (!cancelled) setAdminMode('no')
+        }
+      })()
+    })
 
     return () => {
       cancelled = true
+      unsub()
     }
   }, [])
 
@@ -71,15 +91,16 @@ export function RootNavigator() {
     )
   }
 
-  const initialRoute: keyof RootStackParamList =
-    adminMode === 'yes' ? 'AdminMain' : session ? 'Main' : 'Welcome'
+  if (bootRouteRef.current === null) {
+    bootRouteRef.current =
+      adminMode === 'yes' ? 'AdminMain' : session ? 'Main' : 'Welcome'
+  }
 
   return (
     <View style={{ flex: 1 }}>
       <Stack.Navigator
-        key={`${adminMode}-${session?.email ?? 'guest'}`}
         screenOptions={{ headerShown: false }}
-        initialRouteName={initialRoute}
+        initialRouteName={bootRouteRef.current}
       >
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="AdminLogin" component={AdminLoginScreen} />

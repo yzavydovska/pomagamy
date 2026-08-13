@@ -6,7 +6,7 @@ type Props = {
   initials: string
   size?: number
   onPress?: () => void
-  /** Jasny obramowanie i inicjały — na kolorowym tle nagłówka profilu */
+  
   hero?: boolean
 }
 

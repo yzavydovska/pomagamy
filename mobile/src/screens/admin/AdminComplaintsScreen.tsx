@@ -96,7 +96,7 @@ export function AdminComplaintsScreen() {
         <Text style={styles.headerSub}>
           {useFb
             ? 'Zgłoszenia z aplikacji — otwórz szczegóły, żeby zobaczyć pełny opis.'
-            : 'Lista przykładowa bez Firebase.'}
+            : 'Lista przykładowa (bez synchronizacji).'}
         </Text>
       </View>
 

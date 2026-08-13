@@ -28,12 +28,12 @@ async function pauseBetweenAggregates(): Promise<void> {
 }
 
 export type AdminDashboardStats = {
-  /** Konta wolontariuszy i organizacji (bez ról admin w liczniku). */
+  
   uzytkownicy: number
   ogloszenia: number
-  /** Zgłoszenia wolontariuszy do zadań (kolekcja applications). */
+  
   zgloszenia: number
-  /** Organizacje ze statusem oczekującym na weryfikację. */
+  
   doModeracji: number
   skargi: number
 }
@@ -53,8 +53,6 @@ async function mergeStatsWithOptionalDoc(live: AdminDashboardStats): Promise<Adm
   const snap = await getDoc(STATS_DOC())
   if (!snap.exists()) return live
   const d = snap.data() as DocumentData
-  // Domyślnie tylko agregacja (live). Nadpisanie z dokumentu tylko gdy jawnie włączone — inaczej
-  // pusty lub testowy admin/stats z samymi zerami kasuje prawdziwe liczniki.
   if (d.mergeCounts !== true) return live
   return {
     uzytkownicy: d.uzytkownicy != null ? Number(d.uzytkownicy) : live.uzytkownicy,
@@ -65,7 +63,6 @@ async function mergeStatsWithOptionalDoc(live: AdminDashboardStats): Promise<Adm
   }
 }
 
-/** Zliczenia z Firestore (tylko metadane — bez pobierania wszystkich dokumentów). Wymaga zalogowanego konta administratora (token w żądaniu). */
 export async function fetchAdminAggregatedStats(): Promise<AdminDashboardStats> {
   const user = getFirebaseAuth().currentUser
   if (!user) {
@@ -77,7 +74,6 @@ export async function fetchAdminAggregatedStats(): Promise<AdminDashboardStats> 
   const usersOrgQ = query(collection(db, 'users'), where('role', '==', 'organization'))
   const orgsPendingQ = query(collection(db, 'organizations'), where('verificationStatus', '==', 'pending'))
 
-  // Kolejno zamiast Promise.all — łagodniej dla klienta RN/Hermes (unikanie sporadycznych INTERNAL ASSERTION przy watch + agregacjach).
   const usersVolSnap = await getCountFromServer(usersVolQ)
   await pauseBetweenAggregates()
   const usersOrgSnap = await getCountFromServer(usersOrgQ)
@@ -100,9 +96,6 @@ export async function fetchAdminAggregatedStats(): Promise<AdminDashboardStats> 
   return mergeStatsWithOptionalDoc(live)
 }
 
-/**
- * Odświeżane liczniki: agregacje z kolekcji + opcjonalne nadpisanie polami z dokumentu admin/stats (np. Cloud Function).
- */
 export type AdminDashboardStatsMeta = { source: 'firestore' | 'mock' }
 
 export function subscribeAdminDashboardMetrics(
@@ -134,7 +127,6 @@ export function subscribeAdminDashboardMetrics(
   }
 }
 
-/** Ostatnie skargi jako wpisy „aktywności” (lekki snapshot, limit 12). */
 export function subscribeAdminRecentComplaintActivity(
   onData: (rows: AdminActivityRow[]) => void,
   onError?: (e: Error) => void,
@@ -179,7 +171,6 @@ export function subscribeAdminRecentComplaintActivity(
   }
 }
 
-/** @deprecated Użyj subscribeAdminDashboardMetrics */
 export function subscribeComplaintsCount(
   onCount: (n: number) => void,
   onError?: (e: Error) => void,
@@ -190,7 +181,6 @@ export function subscribeComplaintsCount(
   )
 }
 
-/** @deprecated Użyj subscribeAdminDashboardMetrics */
 export function subscribeAdminStats(
   onData: (stats: AdminDashboardStats) => void,
   onError?: (e: Error) => void,
@@ -206,7 +196,7 @@ function moderatedAtIsoFromFirestoreAdmin(raw: unknown): string | undefined | nu
     try {
       return o.toDate().toISOString()
     } catch {
-      /* ignore */
+      
     }
   }
   if (typeof o?.seconds === 'number') return new Date(o.seconds * 1000).toISOString()
@@ -238,7 +228,6 @@ function complaintDocToModel(docId: string, x: DocumentData): Complaint {
   }
 }
 
-/** Pojedyncza skarga — ekran szczegółów (admin ma prawo odczytu dokumentu). */
 export async function fetchComplaintDocumentForAdmin(complaintId: string): Promise<Complaint | null> {
   const trimmed = complaintId.trim()
   if (!trimmed) return null
@@ -247,7 +236,6 @@ export async function fetchComplaintDocumentForAdmin(complaintId: string): Promi
   return complaintDocToModel(snap.id, snap.data())
 }
 
-/** Wszystkie skargi — tylko dla admina (reguły Firestore). */
 export function subscribeComplaintsForAdmin(
   onData: (items: Complaint[]) => void,
   onError?: (e: Error) => void,
@@ -263,7 +251,6 @@ export function subscribeComplaintsForAdmin(
   )
 }
 
-/** Aktualny status moderacji lub «pending», jeśli w dokumencie brak pola. */
 export function complaintEffectiveModeration(c: Complaint): ComplaintModerationStatus {
   return c.moderationStatus ?? 'pending'
 }
@@ -291,7 +278,6 @@ export async function findUserUidByAccountPublicId(accountPublicId: string): Pro
   return { uid: snap.docs[0].id }
 }
 
-/** Admin ustawia `accountSuspended` — nie dotyczy kont z rolą `admin`. */
 export async function firebaseSetAccountSuspendedAdmin(
   targetUid: string,
   suspended: boolean,
@@ -345,7 +331,6 @@ export function mapOrgDoc(id: string, data: DocumentData): OrganizacjaDoWeryfika
   }
 }
 
-/** Kolekcja organizations — pole verificationStatus: "pending" | "approved" | "rejected" */
 export function subscribeOrganizationsByVerification(
   verificationStatus: 'pending' | 'approved' | 'rejected',
   onData: (orgs: OrganizacjaDoWeryfikacji[]) => void,
@@ -383,7 +368,6 @@ export async function fetchOrganizationById(id: string): Promise<OrganizacjaDoWe
 
 const BATCH_LIMIT = 400
 
-/** Admin: zatwierdza organizację — profil, wpis organizations oraz publiczna widoczność ogłoszeń. */
 export async function approveOrganization(ownerUid: string): Promise<void> {
   const database = getFirebaseDb()
   let batch = writeBatch(database)
@@ -412,7 +396,6 @@ export async function approveOrganization(ownerUid: string): Promise<void> {
 
 const REJECT_REASON_MIN = 10
 
-/** Admin: odrzuca organizację — wymaga powodu widocznego dla organizacji w aplikacji. */
 export async function rejectOrganization(ownerUid: string, reason: string): Promise<void> {
   const trimmed = String(reason ?? '').trim()
   if (trimmed.length < REJECT_REASON_MIN) {

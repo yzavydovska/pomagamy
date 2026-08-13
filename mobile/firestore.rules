@@ -1,6 +1,5 @@
 rules_version = '2';
 
-// Firebase Console → Firestore → Reguły → Opublikuj (Publish).
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -19,7 +18,6 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
 
-    /** Organizacja z zweryfikowanym kontem — może publikować ogłoszenia (visibleToVolunteers: true). */
     function orgIsApproved() {
       return request.auth != null
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
@@ -37,7 +35,6 @@ service cloud.firestore {
       );
     }
 
-    /** Kształt dokumentu in-app powiadomienia (minimalna lista pól jak w aplikacji). */
     function inAppNotificationPayloadShapeOk(nId) {
       return request.resource.data.keys().hasOnly(['id', 'title', 'body', 'read', 'createdAt', 'applicationId'])
         && request.resource.data.id == nId
@@ -52,11 +49,7 @@ service cloud.firestore {
         );
     }
 
-    /**
-     * Organizacja zapisuje wiadomość u wolontariusza (ścieżka users/{volunteerUid}/inAppNotifications).
-     * Dozwolone tylko, gdy dokument `applications/{applicationId}` należy do tego wolontariusza
-     * i jest obsługiwany przez aktualnie zalogowaną organizację (jak przy update statusu).
-     */
+   
     function orgCreatesNotificationForVolunteer(volunteerPathUid) {
       return sessionRole() == 'organization'
         && request.resource.data.applicationId is string
@@ -75,14 +68,12 @@ service cloud.firestore {
         );
     }
 
-    /** Zapis zgłoszenia tylko z kontem wolontariusza (dokument users/{uid}). */
     function sessionVolunteer() {
       return request.auth != null
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'volunteer';
     }
 
-    /** Pierwszy zapis pola `accountPublicId` przez właściciela konta (dopełnienie dla starszych rejestracji). */
     function userSelfAllowsAccountPublicIdBackfill(uid) {
       return request.auth.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['accountPublicId'])
@@ -106,7 +97,6 @@ service cloud.firestore {
           || request.resource.data.orgVerificationStatus == 'pending'
         );
 
-      /** Profil lub — wyłącznie dla organizacji — powrót do kolejki po odrzuceniu przez admina. */
       allow update: if isAdmin() || userSelfAllowsAccountPublicIdBackfill(userId) || (
         request.auth.uid == userId
         && (
@@ -124,7 +114,6 @@ service cloud.firestore {
       match /inAppNotifications/{nId} {
         allow read: if request.auth != null && request.auth.uid == userId;
 
-        /** Wolontariusz — własne powiadomienia; organizacja — zapis przy akceptacji / zakończeniu (+ powiązane flow). */
         allow create: if request.auth != null
           && inAppNotificationPayloadShapeOk(nId)
           && (
@@ -150,8 +139,7 @@ service cloud.firestore {
     }
 
     match /ogloszenia/{listingId} {
-      // Publicznie: ogłoszenia widoczne dla wolontariuszy (nawet bez logowania).
-      // get(..., false) — starsze dokumenty bez pola nie psują reguły przy agregacjach/licznikach.
+     
       allow read: if resource.data.get('visibleToVolunteers', false) == true
         || (request.auth != null && (
           isAdmin()
@@ -203,7 +191,6 @@ service cloud.firestore {
       );
     }
 
-    /** Zmiana wyłącznie statusu moderacji skargi (panel admina). */
     function complaintModerationPatchOk() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['moderationStatus', 'moderatedAt'])
         && (
@@ -238,7 +225,6 @@ service cloud.firestore {
       allow update: if isAdmin() && complaintModerationPatchOk();
     }
 
-    /** Tylko liczniki panelu — aplikacja nie korzysta z Firestore do tłumaczeń ani innych dokumentów w `admin/`. */
     match /admin/stats {
       allow read, write: if isAdmin();
     }
@@ -250,7 +236,6 @@ service cloud.firestore {
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.verificationStatus == 'pending';
 
-      /** Admin — dowolnie. Właściciel — pole statyczne lub jednorazowy powrót rejected → pending (z aktualizacją dat zgłoszenia). */
       allow update: if isAdmin() || (
         request.auth.uid == orgId
         && (
@@ -263,6 +248,22 @@ service cloud.firestore {
             && request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['verificationStatus', 'zgloszonoData', 'zgloszonoPelna', 'verificationRejectionReason'])
           )
+        )
+        && (
+          isAdmin()
+          || request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              'verificationStatus',
+              'zgloszonoData',
+              'zgloszonoPelna',
+              'verificationRejectionReason',
+              'nip',
+              'krs',
+              'dokumenty',
+              'dokumentyPliki',
+              'nazwa',
+              'telefon',
+            ])
         )
       );
 

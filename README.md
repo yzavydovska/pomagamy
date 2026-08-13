@@ -1,17 +1,20 @@
-# PomagaMY (`pomagamy`)
+# PomagaMY
 
-Repozytorium monorepo: aplikacja wolontariacka i pokrewne artefakty.
+Aplikacja wolontariacka — kod źródłowy.
 
 ## Pakiety
 
-| Katalog   | Opis |
-|-----------|------|
-| [`mobile/`](mobile/) | Aplikacja **Expo / React Native** — główny produkt (**Android** w pierwszym wydaniu). Szczegóły instalacji i uruchamiania: [`mobile/README.md`](mobile/README.md). |
-| [`web/`](web/) | Warstwa webowa (konfiguracja we własnym README). |
+| Katalog | Opis |
+|---------|------|
+| [`mobile/`](mobile/) | Aplikacja **Expo / React Native** — główny produkt (**Android**). Instalacja i uruchomienie: [`mobile/README.md`](mobile/README.md). |
+| [`web/`](web/) | Warstwa webowa (Vite + React). |
+| [`wordpress-landing-wolontariat/`](wordpress-landing-wolontariat/) | Motyw WordPress — strona landing. |
 
-## Dokumentacja kluczowa (mobile)
+## Szybki start (aplikacja mobilna)
 
-- [`mobile/FIREBASE_SETUP.md`](mobile/FIREBASE_SETUP.md)
-- [`mobile/docs/git-pushy-kroki.md`](mobile/docs/git-pushy-kroki.md)
-
-Repozytorium tylko z podkatalogiem `mobile/` dla narzędzi CI lub sklonowania lekkiego: zobacz instrukcję w dokumentacji mobilnej ([`mobile/README.md`](mobile/README.md) — historia zmian / sync).
+```bash
+cd mobile
+npm install
+# skopiuj .env.example → .env i uzupełnij klucze Firebase (opcjonalnie)
+npm run start:go
+```

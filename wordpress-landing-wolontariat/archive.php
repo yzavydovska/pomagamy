@@ -34,7 +34,7 @@ get_header();
 							<div class="wol-blog-card__excerpt">
 								<?php the_excerpt(); ?>
 							</div>
-							<a class="wol-blog-card__more" href="<?php the_permalink(); ?>"><?php esc_html_e('Czytaj dalej', 'wolontariat-landing'); ?></a>
+							<a class="wol-blog-card__more" href="<?php the_permalink(); ?>">Czytaj dalej</a>
 						</article>
 					</li>
 					<?php
@@ -46,14 +46,14 @@ get_header();
 				the_posts_pagination(
 					array(
 						'mid_size'  => 2,
-						'prev_text' => __('Poprzednia', 'wolontariat-landing'),
-						'next_text' => __('Następna', 'wolontariat-landing'),
+						'prev_text' => 'Poprzednia',
+						'next_text' => 'Następna',
 					)
 				);
 				?>
 			</div>
 		<?php else : ?>
-			<p class="wol-blog-empty"><?php esc_html_e('Brak wpisów w tym archiwum.', 'wolontariat-landing'); ?></p>
+			<p class="wol-blog-empty">Brak wpisów w tym archiwum.</p>
 		<?php endif; ?>
 	</div>
 </section>
