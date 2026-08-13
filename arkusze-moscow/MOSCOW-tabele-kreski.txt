@@ -1,0 +1,104 @@
+================================================================================
+  MoSCoW PomagaMY — tabele do Google Sheets i tablic
+================================================================================
+
+GOOGLE SHEETS
+-------------
+1) Nowy arkusz → Plik → Importuj → Prześlij → wybierz plik .tsv z tego folderu
+   → typ separatora: TAB (tabulator).
+2) Albo: otwórz .tsv w Notatniku → Ctrl+A → Ctrl+C → w arkuszu zaznacz A1 → Ctrl+V.
+
+PLIKI (folder arkusze-moscow)
+-----------------------------
+  01-funkcjonalne.tsv        — 31 wierszy, 7 kolumn (pełny opis + Uwagi MVP)
+  02-legenda.tsv             — Must / Should / Could / Won't
+  03-niefunkcjonalne.tsv     — wymagania niefunkcjonalne
+  04-definition-of-done.tsv  — Definition of Done
+  05-metadane.tsv            — metadane dokumentu
+
+LEGENDA
+-------
+  Must   — robisz w sprincie    |  Should — po MVP lub przy nadmiarze czasu
+  Could — później               |  Won't  — świadomie nie teraz
+
+================================================================================
+  TABELA NA TABLICĘ (4 kolumny, kreski + kreski pionowe)
+================================================================================
+
++----+--------------------------------+--------------------------------+---------+
+| Lp | Sekcja                         | Funkcjonalność                 | MoSCoW  |
++----+--------------------------------+--------------------------------+---------+
+| 1  | Rejestracja i logowanie        | Tworzenie konta                | Must    |
+| 2  | Rejestracja i logowanie        | Logowanie przez e-mail         | Must    |
+| 3  | Rejestracja i logowanie        | Logowanie przez social media   | Should  |
+| 4  | Rejestracja i logowanie        | Reset hasła                    | Must    |
+| 5  | Rejestracja i logowanie        | Wylogowanie                    | Must    |
+| 6  | Profil użytkownika             | Przegląd profilu               | Must    |
+| 7  | Profil użytkownika             | Edycja profilu                 | Must    |
+| 8  | Profil użytkownika             | Usuwanie konta                 | Should  |
+| 9  | Opinie i oceny                 | Ocena wolontariusza            | Should  |
+| 10 | Opinie i oceny                 | Ocena organizacji              | Should  |
+| 11 | Opinie i oceny                 | Komentarze dwustronne          | Should  |
+| 12 | Ogłoszenia                     | Tworzenie ogłoszeń            | Must    |
+| 13 | Ogłoszenia                     | Przegląd ogłoszeń              | Must    |
+| 14 | Ogłoszenia                     | Filtrowanie i wyszukiwanie     | Should  |
+| 15 | Ogłoszenia                     | Edycja i usuwanie ogłoszeń     | Should  |
+| 16 | Zgłoszenia                     | Wysyłanie zgłoszenia           | Must    |
+| 17 | Zgłoszenia                     | Akceptacja zgłoszenia          | Must    |
+| 18 | Zgłoszenia                     | Zakończenie zadania            | Must    |
+| 19 | Powiadomienia                  | Powiadomienia o zmianie statusu| Must    |
+| 20 | Skargi i nadużycia             | Zgłaszanie skarg               | Must    |
+| 21 | Gamifikacja                    | Zdobywanie gwiazdek            | Could   |
+| 22 | Gamifikacja                    | Sklep z nagrodami              | Could   |
+| 23 | Gamifikacja                    | Bilans gwiazdek                | Could   |
+| 24 | Administrator                  | Moderacja ogłoszeń            | Must    |
+| 25 | Administrator                  | Zarządzanie nagrodami          | Could   |
+| 26 | Administrator                  | Zarządzanie użytkownikami      | Must    |
+| 27 | Administrator                  | Analiza skarg                  | Should  |
+| 28 | Strona projektu                | Landing WordPress              | Must    |
+| 29 | Poza sprintem                  | System czatu                   | Won't   |
+| 30 | Poza sprintem                  | Kalendarz i mapy               | Won't   |
+| 31 | Poza sprintem                  | Partnerstwa B2B (skala)        | Won't   |
++----+--------------------------------+--------------------------------+---------+
+
+================================================================================
+  TEN SAM UKŁAD — same myślniki (bez znaków + i |)
+================================================================================
+
+---------------------------------------------------------------------------
+ Lp  |  Sekcja                    |  Funkcjonalność              | MoSCoW
+---------------------------------------------------------------------------
+ 1  |  Rejestracja i logowanie   |  Tworzenie konta            | Must
+ 2  |  Rejestracja i logowanie   |  Logowanie e-mail           | Must
+ 3  |  Rejestracja i logowanie   |  Logowanie social           | Should
+ 4  |  Rejestracja i logowanie   |  Reset hasła                | Must
+ 5  |  Rejestracja i logowanie   |  Wylogowanie                | Must
+ 6  |  Profil użytkownika        |  Przegląd profilu          | Must
+ 7  |  Profil użytkownika        |  Edycja profilu             | Must
+ 8  |  Profil użytkownika        |  Usuwanie konta             | Should
+ 9  |  Opinie i oceny            |  Ocena wolontariusza        | Should
+10  |  Opinie i oceny            |  Ocena organizacji          | Should
+11  |  Opinie i oceny            |  Komentarze                 | Should
+12  |  Ogłoszenia                |  Tworzenie ogłoszeń        | Must
+13  |  Ogłoszenia                |  Przegląd ogłoszeń         | Must
+14  |  Ogłoszenia                |  Filtry i wyszukiwanie      | Should
+15  |  Ogłoszenia                |  Edycja/usuwanie własnych   | Should
+16  |  Zgłoszenia                |  Wysłanie zgłoszenia        | Must
+17  |  Zgłoszenia                |  Akceptacja zgłoszenia     | Must
+18  |  Zgłoszenia                |  Zakończenie zadania        | Must
+19  |  Powiadomienia            |  Zmiana statusu zgłoszenia  | Must
+20  |  Skargi i nadużycia        |  Zgłaszanie skarg           | Must
+21  |  Gamifikacja               |  Gwiazdki                   | Could
+22  |  Gamifikacja               |  Sklep nagród               | Could
+23  |  Gamifikacja               |  Bilans gwiazdek            | Could
+24  |  Administrator             |  Moderacja ogłoszeń        | Must
+25  |  Administrator             |  Nagrody w sklepie          | Could
+26  |  Administrator             |  Blokada użytkowników      | Must
+27  |  Administrator             |  Analiza skarg              | Should
+28  |  Strona projektu           |  Landing WordPress          | Must
+29  |  Poza sprintem             |  Czat                       | Won't
+30  |  Poza sprintem             |  Kalendarz i mapy           | Won't
+31  |  Poza sprintem             |  Partnerstwa B2B            | Won't
+---------------------------------------------------------------------------
+
+Pełny opis, rola i „Uwagi MVP” — importuj plik 01-funkcjonalne.tsv do arkusza.

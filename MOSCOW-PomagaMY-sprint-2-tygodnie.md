@@ -1,0 +1,113 @@
+# MoSCoW — System wolontariatu PomagaMY — sprint 2 tygodnie
+
+## Metadane dokumentu
+
+| Pole | Wartość |
+|------|---------|
+| Produkt | PomagaMY — platforma wolontariatu |
+| Metoda priorytetyzacji | MoSCoW |
+| Zakres czasowy | 2 tygodnie (MVP demonstracyjny) |
+| Data / wersja | Wersja pod eksport do DOCX |
+
+## 1. Wprowadzenie (opis kontekstu)
+
+| Aspekt | Treść |
+|--------|--------|
+| Cel projektu | Intuicyjna i bezpieczna platforma łącząca organizacje z wolontariuszami. |
+| Cel tej wersji MoSCoW | Dopasowanie zakresu do **dwutygodniowego sprintu**: działający główny przepływ (ogłoszenie → zgłoszenie → akceptacja → zakończenie) oraz minimalna administracja. |
+| Komponenty techniczne | Aplikacja mobilna (`mobile/`), wersja web (`web/`), landing WordPress (`wordpress-landing-wolontariat/`), UI w Figma. Wymagania funkcjonalne dotyczą głównie **mobile + web**; landing — prezentacja i CTA do aplikacji. |
+| Zasada sprintu | Jedna **tabela poniżej (§2)** zbiera wszystkie funkcje: **sekcja, rola, funkcjonalność, opis** + **MoSCoW** + **co robisz w MVP**. „Osoba potrzebująca pomocy” = rola **organizacji** w PomagaMY. |
+
+---
+
+## 2. Wymagania funkcjonalne — jedna czytelna tabela
+
+Najpierw **legenda**, potem **pełna lista w jednej tabeli** (31 wierszy) — tak Word po eksporcie pokazuje jeden spójny układ.
+
+### Legenda MoSCoW (kolumna „MoSCoW”)
+
+| Symbol | Znaczenie |
+|--------|-----------|
+| Must | Robisz w tym sprincie (może być uproszczenie — wtedy w „Uwagi MVP”). |
+| Should | Ważne, ale **po** MVP lub tylko jeśli starczy czasu. |
+| Could | Kolejne iteracje; **nie** planuj w tych 2 tygodniach. |
+| Won’t | Świadomie **nie** robisz w tym horyzoncie. |
+
+### Tabela: Lp. + Sekcja + Rola + Funkcjonalność + Opis + MoSCoW + Uwagi MVP
+
+| Lp. | Sekcja | Rola | Funkcjonalność | Opis | MoSCoW | Uwagi MVP (2 tygodnie) |
+|:---:|:-------|:-----|:---------------|:-----|:------:|:-----------------------|
+| 1 | Rejestracja i logowanie | Gość | Tworzenie konta | Rejestracja jako wolontariusz lub osoba potrzebująca pomocy (organizacja). | Must | Tak — pełna ścieżka z podziałem ról. |
+| 2 | Rejestracja i logowanie | Gość | Logowanie przez e-mail | Dostęp za pomocą e-maila i hasła. | Must | Tak. |
+| 3 | Rejestracja i logowanie | Gość | Logowanie przez media społecznościowe | Logowanie np. Google, Facebook. | Should | Nie w obowiązkowym MVP. |
+| 4 | Rejestracja i logowanie | Gość lub zalogowany | Reset hasła | Reset hasła (np. link na e-mail). | Must | Tak — minimum e-mail; bez wymogu wszystkich providerów. |
+| 5 | Rejestracja i logowanie | Użytkownik zalogowany | Wylogowanie | Zakończenie sesji użytkownika. | Must | Tak. |
+| 6 | Profil użytkownika | Użytkownik zalogowany | Przegląd profilu | Dane, rola; docelowo statystyki, gwiazdki, historia. | Must | Uproszczenie: rola, dane, listy „moje zgłoszenia” i „moje ogłoszenia”; bez gwiazdek. |
+| 7 | Profil użytkownika | Użytkownik zalogowany | Edycja profilu | Imię, zdjęcie, opis, dane kontaktowe. | Must | Tak; minimum: identyfikacja i kontakt. |
+| 8 | Profil użytkownika | Użytkownik zalogowany | Usuwanie konta | Trwałe usunięcie własnego konta. | Should | Opcjonalnie w sprincie. |
+| 9 | Opinie i oceny | Organizacja | Ocena wolontariusza | Po zakończeniu zadania organizacja ocenia wolontariusza. | Should | Po MVP. |
+| 10 | Opinie i oceny | Wolontariusz | Ocena organizacji | Ocena po wykonanym zadaniu. | Should | Po MVP. |
+| 11 | Opinie i oceny | Wolontariusz lub organizacja | Komentarze dwustronne | Komentarze z obu stron. | Should | Po MVP. |
+| 12 | Ogłoszenia | Organizacja | Tworzenie ogłoszeń | Tylko organizacja (lub konto powiązane z organizacją) dodaje ogłoszenia o pomocy. | Must | Tak; w MVP możliwa prosta weryfikacja konta org.; pełny proces weryfikacji — późiej. |
+| 13 | Ogłoszenia | Gość lub zalogowany | Przegląd ogłoszeń | Przeglądanie listy ogłoszeń. | Must | Tak. |
+| 14 | Ogłoszenia | Gość lub zalogowany | Filtrowanie i wyszukiwanie | Kategoria, lokalizacja, termin. | Should | Po MVP lub na końcu sprintu. |
+| 15 | Ogłoszenia | Organizacja, właściciel | Edycja i usuwanie ogłoszeń | Edycja i usunięcie własnych ogłoszeń. | Should | W MVP często wystarczy usunięcie przez admina. |
+| 16 | Zgłoszenia | Wolontariusz | Wysyłanie zgłoszenia | Zgłoszenie chęci pomocy przy ogłoszeniu. | Must | Tak. |
+| 17 | Zgłoszenia | Organizacja | Akceptacja zgłoszenia | Wybór wolontariusza z listy zgłoszeń. | Must | Tak. |
+| 18 | Zgłoszenia | Organizacja | Zakończenie zadania | Potwierdzenie realizacji po wykonaniu. | Must | Tak. |
+| 19 | Powiadomienia | Wolontariusz lub organizacja | Powiadomienia o zmianie statusu | Informacja o zmianie statusu zgłoszenia (docelowo push). | Must | W MVP: tylko w aplikacji. Push: Should. |
+| 20 | Skargi i nadużycia | Użytkownik zalogowany | Zgłaszanie nadużyć i skarg | Ogłoszenia, zachowania, nieuczciwe oceny. | Must | Tak: formularz i zapis. |
+| 21 | Gamifikacja | Wolontariusz | Zdobywanie gwiazdek | Punkty za wykonane zadania. | Could | Nie w sprincie. |
+| 22 | Gamifikacja | Wolontariusz | Sklep z nagrodami | Wymiana gwiazdek na nagrody. | Could | Nie w sprincie. |
+| 23 | Gamifikacja | Wolontariusz | Bilans gwiazdek | Liczba gwiazdek w profilu. | Could | Nie w sprincie. |
+| 24 | Administrator | Administrator | Moderacja ogłoszeń | Usuwanie ogłoszeń naruszających regulamin. | Must | Tak. |
+| 25 | Administrator | Administrator | Zarządzanie nagrodami | Dodawanie i edycja nagród w sklepie. | Could | Nie w sprincie. |
+| 26 | Administrator | Administrator | Zarządzanie użytkownikami | Podgląd profili i blokada kont. | Must | Tak: blokada i podstawowe dane. |
+| 27 | Administrator | Administrator | Analiza skarg | Przegląd skarg i działania. | Should | W MVP: **lista** skarg; pełny workflow — później. |
+| 28 | Strona projektu | Gość | Landing WordPress | Strona publiczna PomagaMY, linki do aplikacji. | Must | Tak (motyw landing w repozytorium). |
+| 29 | Poza sprintem | — | System czatu | Czat między użytkownikami. | Won’t | Nie teraz. |
+| 30 | Poza sprintem | — | Kalendarz i mapy | Integracje zewnętrzne. | Won’t | Nie teraz. |
+| 31 | Poza sprintem | — | Partnerstwa B2B (skala) | Duże programy firmowe. | Won’t | Nie teraz. |
+
+**Szeroka tabela w Wordzie:** zaznacz tabelę → Układ → **Autodopasuj do zawartości** lub ustaw orientację strony na poziomą dla tej sekcji.
+
+---
+
+## 3. Wymagania niefunkcjonalne — jedna tabela
+
+| Lp. | Kategoria | MoSCoW | Wymaganie | Uwagi MVP |
+|:---:|:----------|:------:|:----------|:----------|
+| N1 | Bezpieczeństwo | Must | Hasło: min. 8 znaków, litery, cyfry, znak specjalny. | Tak. |
+| N2 | Bezpieczeństwo | Must | Hasła jako hash (np. bcrypt) lub auth dostawcy. | Tak. |
+| N3 | Bezpieczeństwo | Must | HTTPS w środowisku docelowym. | Tak. |
+| N4 | Bezpieczeństwo | Should | Szyfrowanie danych w spoczynku (np. AES-256) — docelowo. | Opisać w pracy; implementacja może być później. |
+| N5 | Bezpieczeństwo | Could | Audyt RODO / DPIA. | Jeśli promotor wymaga. |
+| N6 | Język | Must | Domyślnie polski, bez żargonu IT. | Tak. |
+| N7 | Język | Could | Wielojęzyczność (i18n). | Po MVP. |
+| N8 | Kompatybilność | Must | Android 8+ (mobile). | Minimum testów. |
+| N9 | Kompatybilność | Must | Web: 2 ostatnie wersje Chrome, Firefox, Edge. | Smoke test. |
+| N10 | Kompatybilność | Must | Responsywność; telefon od ok. 4,5". | Tak. |
+
+---
+
+## 4. Definition of Done — kryteria ukończenia sprintu
+
+| Lp. | Kryterium |
+|:---:|:----------|
+| D1 | Ścieżka: organizacja dodaje ogłoszenie → wolontariusz składa zgłoszenie → akceptacja → zamknięcie zadania. |
+| D2 | Admin usuwa naruszające ogłoszenie i może zablokować konto. |
+| D3 | Użytkownik widzi zmianę statusu w aplikacji (in-app). |
+| D4 | Landing WordPress kieruje do aplikacji i jest spójny z projektem graficznym. |
+
+---
+
+## Eksport do pliku Word (DOCX)
+
+| Sposób | Instrukcja |
+|--------|------------|
+| Pandoc | `"%LOCALAPPDATA%\Pandoc\pandoc.exe" "ścieżka\MOSCOW-PomagaMY-sprint-2-tygodnie.md" -o "ścieżka\MOSCOW-PomagaMY-sprint-2-tygodnie.docx"` — jeśli plik .docx jest otwarty w Wordzie i pojawi się błąd, zapisz pod inną nazwą, np. `...-WYDRUK.docx`. |
+| Po otwarciu DOCX | Popraw szerokości kolumn w §2; ewentualnie obróć stronę dla tabeli. |
+
+---
+
+*Pełniejszy MoSCoW docelowy można opisać w kolejnych rozdziałach jako plan po MVP.*

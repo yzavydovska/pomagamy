@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Raport MoSCoW — PomagaMY (sprint 2 tygodnie)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a1f2e;
+      --muted: #5c6478;
+      --line: #c8cedc;
+      --paper: #f7f8fb;
+      --card: #ffffff;
+      --accent: #2d4a6f;
+      --must-bg: #e8f5ed;
+      --must-fg: #1e6b3a;
+      --should-bg: #fff8e6;
+      --should-fg: #8a5a00;
+      --could-bg: #eef0f4;
+      --could-fg: #4a5568;
+      --wont-bg: #fdecef;
+      --wont-fg: #9b1c3d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .cover {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 2.5rem 2rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(26, 31, 46, 0.06);
+    }
+    .cover-kicker {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    h1 {
+      font-family: Literata, Georgia, serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: var(--ink);
+      line-height: 1.25;
+    }
+    .cover-sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin: 0 0 1.5rem;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0.35rem 1rem;
+      font-size: 0.9rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1.25rem;
+    }
+    .meta-grid dt { color: var(--muted); font-weight: 500; margin: 0; }
+    .meta-grid dd { margin: 0; }
+
+    .exec {
+      background: linear-gradient(135deg, #f0f4fa 0%, #e8eef6 100%);
+      border-left: 4px solid var(--accent);
+      padding: 1rem 1.25rem;
+      margin: 2rem 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .exec h2 { margin: 0 0 0.5rem; font-size: 1rem; font-family: Literata, serif; }
+    .exec ul { margin: 0.5rem 0 0; padding-left: 1.2rem; }
+
+    .toc {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+    }
+    .toc h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      font-family: Literata, serif;
+    }
+    .toc ol { margin: 0; padding-left: 1.25rem; color: var(--accent); font-weight: 600; }
+    .toc li { margin: 0.35rem 0; font-weight: 400; color: var(--ink); }
+    .toc a { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    h2.section {
+      font-family: Literata, serif;
+      font-size: 1.35rem;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 2px solid var(--accent);
+      color: var(--ink);
+    }
+    h3 { font-size: 1.05rem; margin: 1.5rem 0 0.75rem; color: var(--ink); }
+
+    .intro-dl {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 0.65rem 1rem;
+      font-size: 0.95rem;
+    }
+    .intro-dl dt { margin: 0; color: var(--muted); font-weight: 500; }
+    .intro-dl dd { margin: 0; }
+
+    table.req {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      margin: 1rem 0 1.5rem;
+    }
+    table.req th,
+    table.req td {
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.req th {
+      background: #e9edf5;
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--accent);
+    }
+    table.req tbody tr:nth-child(even) { background: #fafbfd; }
+    table.req .num { width: 2.5rem; text-align: center; font-weight: 600; color: var(--muted); }
+    table.req .moscow { width: 5.5rem; text-align: center; white-space: nowrap; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge-must { background: var(--must-bg); color: var(--must-fg); }
+    .badge-should { background: var(--should-bg); color: var(--should-fg); }
+    .badge-could { background: var(--could-bg); color: var(--could-fg); }
+    .badge-wont { background: var(--wont-bg); color: var(--wont-fg); }
+
+    table.req tr.section-row td {
+      background: #e3e8f0;
+      font-family: Literata, serif;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--accent);
+      border-color: #b8c4d8;
+    }
+
+    .legend-mini {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.82rem;
+    }
+    .legend-mini span { display: inline-flex; align-items: center; gap: 0.35rem; }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0 2rem;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.85rem;
+      text-align: center;
+    }
+    .stat-card .n { font-size: 1.5rem; font-weight: 700; font-family: Literata, serif; }
+    .stat-card .l { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .footer-note {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    @media print {
+      body { background: #fff; font-size: 11pt; }
+      .wrap { max-width: none; padding: 0; }
+      .cover { box-shadow: none; page-break-after: avoid; }
+      h2.section { page-break-after: avoid; }
+      table.req { page-break-inside: auto; }
+      table.req tr { page-break-inside: avoid; }
+      a[href] { color: var(--ink); text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="cover">
+      <p class="cover-kicker">Dokument priorytetyzacji</p>
+      <h1>Raport MoSCoW — system wolontariatu PomagaMY</h1>
+      <p class="cover-sub">Zakres sprintu: dwa tygodnie (MVP demonstracyjny). Metoda: MoSCoW (Must / Should / Could / Won’t).</p>
+      <dl class="meta-grid">
+        <dt>Produkt</dt><dd>PomagaMY — platforma wolontariatu</dd>
+        <dt>Wersja dokumentu</dt><dd>Raport HTML — do druku lub zapisu jako PDF</dd>
+        <dt>Zakres techniczny</dt><dd>Aplikacja mobilna, wersja web, landing WordPress, projekt UI (Figma)</dd>
+      </dl>
+    </header>
+
+    <aside class="exec">
+      <h2>Streszczenie dla promotora</h2>
+      <ul>
+        <li>Celem sprintu jest <strong>działający główny proces</strong>: ogłoszenie → zgłoszenie → akceptacja → zakończenie zadania oraz <strong>minimalna administracja</strong> (moderacja, blokada kont, lista skarg).</li>
+        <li>Powiadomienia w MVP: <strong>w aplikacji</strong> (nie jako obowiązkowy push). Gamifikacja i sklep — <strong>poza sprintem</strong> (Could).</li>
+        <li>W dokumencie „osoba potrzebująca pomocy” jest utożsamiana z rolą <strong>organizacji</strong> w modelu PomagaMY.</li>
+      </ul>
+    </aside>
+
+    <nav class="toc" aria-label="Spis treści">
+      <h2>Spis treści</h2>
+      <ol>
+        <li><a href="#wprowadzenie">Wprowadzenie i kontekst</a></li>
+        <li><a href="#legenda">Legenda MoSCoW</a></li>
+        <li><a href="#funkcjonalne">Wymagania funkcjonalne — macierz</a></li>
+        <li><a href="#podsumowanie">Skrót liczbowy priorytetów</a></li>
+        <li><a href="#niefunkcjonalne">Wymagania niefunkcjonalne</a></li>
+        <li><a href="#dod">Definition of Done (koniec sprintu)</a></li>
+      </ol>
+    </nav>
+
+    <h2 class="section" id="wprowadzenie">1. Wprowadzenie i kontekst</h2>
+    <dl class="intro-dl">
+      <dt>Cel projektu</dt>
+      <dd>Intuicyjna i bezpieczna platforma łącząca organizacje z wolontariuszami.</dd>
+      <dt>Cel tej wersji MoSCoW</dt>
+      <dd>Dopasowanie pełnej listy funkcji do <strong>realnego sprintu 2-tygodniowego</strong>: najpierw przepływ wartościowy, potem jakość i rozszerzenia.</dd>
+      <dt>Oprogramowanie w repozytorium</dt>
+      <dd>Katalog <code>mobile/</code>, <code>web/</code>, motyw <code>wordpress-landing-wolontariat/</code>, zasoby Figma.</dd>
+    </dl>
+
+    <h2 class="section" id="legenda">2. Legenda MoSCoW</h2>
+    <div class="legend-mini">
+      <span><span class="badge badge-must">Must</span> Realizacja w sprincie (ew. uproszczona — patrz kolumna „Uwagi MVP”).</span>
+      <span><span class="badge badge-should">Should</span> Ważne po MVP lub przy nadmiarze czasu.</span>
+      <span><span class="badge badge-could">Could</span> Kolejne iteracje.</span>
+      <span><span class="badge badge-wont">Won’t</span> Świadomie wyłączone teraz.</span>
+    </div>
+    <table class="req" aria-label="Legenda słowna">
+      <thead>
+        <tr><th>Symbol</th><th>Znaczenie operacyjne</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="badge badge-must">Must</span></td><td>Funkcja konieczna do uznania MVP za kompletne w ustalonym zakresie.</td></tr>
+        <tr><td><span class="badge badge-should">Should</span></td><td>Wysoka wartość; planowana zaraz po rdzeniu lub w tym samym sprincie o ile czas pozwoli.</td></tr>
+        <tr><td><span class="badge badge-could">Could</span></td><td>Rozwój produktu bez wpływu na zaliczenie bieżącego sprintu.</td></tr>
+        <tr><td><span class="badge badge-wont">Won’t</span></td><td>Nie realizujemy w tym horyzoncie czasowym.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="section" id="funkcjonalne">3. Wymagania funkcjonalne — macierz raportowa</h2>
+    <p style="color:var(--muted); font-size:0.9rem;">Tabela pogrupowana według obszaru funkcjonalnego. Otwórz w przeglądarce i użyj <strong>Drukuj → Zapisz jako PDF</strong>, jeśli potrzebujesz pliku do promotora.</p>
+
+    <table class="req" id="tabela-glowna">
+      <thead>
+        <tr>
+          <th class="num">Lp.</th>
+          <th>Rola</th>
+          <th>Funkcjonalność</th>
+          <th>Opis wymagania</th>
+          <th class="moscow">MoSCoW</th>
+          <th>Uwagi MVP (2 tygodnie)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-row"><td colspan="6">Rejestracja i logowanie</td></tr>
+        <tr><td class="num">1</td><td>Gość</td><td>Tworzenie konta</td><td>Rejestracja jako wolontariusz lub osoba potrzebująca pomocy (organizacja).</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak — pełna ścieżka z podziałem ról.</td></tr>
+        <tr><td class="num">2</td><td>Gość</td><td>Logowanie przez e-mail</td><td>Dostęp za pomocą e-maila i hasła.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak.</td></tr>
+        <tr><td class="num">3</td><td>Gość</td><td>Logowanie przez media społecznościowe</td><td>Logowanie np. Google, Facebook.</td><td class="moscow"><span class="badge badge-should">Should</span></td><td>Nie w obowiązkowym MVP.</td></tr>
+        <tr><td class="num">4</td><td>Gość lub zalogowany</td><td>Reset hasła</td><td>Reset hasła (np. link na e-mail).</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak — minimum e-mail; bez wymogu wszystkich providerów.</td></tr>
+        <tr><td class="num">5</td><td>Użytkownik zalogowany</td><td>Wylogowanie</td><td>Zakończenie sesji użytkownika.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Profil użytkownika</td></tr>
+        <tr><td class="num">6</td><td>Użytkownik zalogowany</td><td>Przegląd profilu</td><td>Dane, rola; docelowo statystyki, gwiazdki, historia.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Uproszczenie: rola, dane, listy „moje zgłoszenia” i „moje ogłoszenia”; bez gwiazdek.</td></tr>
+        <tr><td class="num">7</td><td>Użytkownik zalogowany</td><td>Edycja profilu</td><td>Imię, zdjęcie, opis, dane kontaktowe.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak; minimum: identyfikacja i kontakt.</td></tr>
+        <tr><td class="num">8</td><td>Użytkownik zalogowany</td><td>Usuwanie konta</td><td>Trwałe usunięcie własnego konta.</td><td class="moscow"><span class="badge badge-should">Should</span></td><td>Opcjonalnie w sprincie.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Opinie i oceny</td></tr>
+        <tr><td class="num">9</td><td>Organizacja</td><td>Ocena wolontariusza</td><td>Po zakończeniu zadania organizacja ocenia wolontariusza.</td><td class="moscow"><span class="badge badge-should">Should</span></td><td>Po MVP.</td></tr>
+        <tr><td class="num">10</td><td>Wolontariusz</td><td>Ocena organizacji</td><td>Ocena po wykonanym zadaniu.</td><td class="moscow"><span class="badge badge-should">Should</span></td><td>Po MVP.</td></tr>
+        <tr><td class="num">11</td><td>Wolontariusz lub organizacja</td><td>Komentarze dwustronne</td><td>Komentarze z obu stron.</td><td class="moscow"><span class="badge badge-should">Should</span></td><td>Po MVP.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Ogłoszenia</td></tr>
+        <tr><td class="num">12</td><td>Organizacja</td><td>Tworzenie ogłoszeń</td><td>Tylko organizacja (lub konto powiązane) dodaje ogłoszenia o pomocy.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak; w MVP prosta weryfikacja konta org.; pełny proces weryfikacji — później.</td></tr>
+        <tr><td class="num">13</td><td>Gość lub zalogowany</td><td>Przegląd ogłoszeń</td><td>Przeglądanie listy ogłoszeń.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak.</td></tr>
+        <tr><td class="num">14</td><td>Gość lub zalogowany</td><td>Filtrowanie i wyszukiwanie</td><td>Kategoria, lokalizacja, termin.</td><td class="moscow"><span class="badge badge-should">Should</span></td><td>Po MVP lub na końcu sprintu.</td></tr>
+        <tr><td class="num">15</td><td>Organizacja, właściciel</td><td>Edycja i usuwanie ogłoszeń</td><td>Edycja i usunięcie własnych ogłoszeń.</td><td class="moscow"><span class="badge badge-should">Should</span></td><td>W MVP często wystarczy usunięcie przez admina.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Zgłoszenia</td></tr>
+        <tr><td class="num">16</td><td>Wolontariusz</td><td>Wysyłanie zgłoszenia</td><td>Zgłoszenie chęci pomocy przy ogłoszeniu.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak.</td></tr>
+        <tr><td class="num">17</td><td>Organizacja</td><td>Akceptacja zgłoszenia</td><td>Wybór wolontariusza z listy zgłoszeń.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak.</td></tr>
+        <tr><td class="num">18</td><td>Organizacja</td><td>Zakończenie zadania</td><td>Potwierdzenie realizacji po wykonaniu.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Powiadomienia</td></tr>
+        <tr><td class="num">19</td><td>Wolontariusz lub organizacja</td><td>Powiadomienia o zmianie statusu</td><td>Informacja o zmianie statusu zgłoszenia (docelowo push).</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>W MVP: tylko w aplikacji. Push: Should.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Skargi i nadużycia</td></tr>
+        <tr><td class="num">20</td><td>Użytkownik zalogowany</td><td>Zgłaszanie nadużyć i skarg</td><td>Ogłoszenia, zachowania, nieuczciwe oceny.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak: formularz i zapis.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Gamifikacja</td></tr>
+        <tr><td class="num">21</td><td>Wolontariusz</td><td>Zdobywanie gwiazdek</td><td>Punkty za wykonane zadania.</td><td class="moscow"><span class="badge badge-could">Could</span></td><td>Nie w sprincie.</td></tr>
+        <tr><td class="num">22</td><td>Wolontariusz</td><td>Sklep z nagrodami</td><td>Wymiana gwiazdek na nagrody.</td><td class="moscow"><span class="badge badge-could">Could</span></td><td>Nie w sprincie.</td></tr>
+        <tr><td class="num">23</td><td>Wolontariusz</td><td>Bilans gwiazdek</td><td>Liczba gwiazdek w profilu.</td><td class="moscow"><span class="badge badge-could">Could</span></td><td>Nie w sprincie.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Administrator</td></tr>
+        <tr><td class="num">24</td><td>Administrator</td><td>Moderacja ogłoszeń</td><td>Usuwanie ogłoszeń naruszających regulamin.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak.</td></tr>
+        <tr><td class="num">25</td><td>Administrator</td><td>Zarządzanie nagrodami</td><td>Dodawanie i edycja nagród w sklepie.</td><td class="moscow"><span class="badge badge-could">Could</span></td><td>Nie w sprincie.</td></tr>
+        <tr><td class="num">26</td><td>Administrator</td><td>Zarządzanie użytkownikami</td><td>Podgląd profili i blokada kont.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak: blokada i podstawowe dane.</td></tr>
+        <tr><td class="num">27</td><td>Administrator</td><td>Analiza skarg</td><td>Przegląd skarg i działania.</td><td class="moscow"><span class="badge badge-should">Should</span></td><td>W MVP lista skarg; pełny workflow później.</td></tr>
+
+        <tr class="section-row"><td colspan="6">Strona projektu</td></tr>
+        <tr><td class="num">28</td><td>Gość</td><td>Landing WordPress</td><td>Strona publiczna PomagaMY, linki do aplikacji.</td><td class="moscow"><span class="badge badge-must">Must</span></td><td>Tak (motyw landing w repozytorium).</td></tr>
+
+        <tr class="section-row"><td colspan="6">Świadomie poza zakresem sprintu</td></tr>
+        <tr><td class="num">29</td><td>—</td><td>System czatu</td><td>Czat między użytkownikami.</td><td class="moscow"><span class="badge badge-wont">Won’t</span></td><td>Nie teraz.</td></tr>
+        <tr><td class="num">30</td><td>—</td><td>Kalendarz i mapy</td><td>Integracje zewnętrzne.</td><td class="moscow"><span class="badge badge-wont">Won’t</span></td><td>Nie teraz.</td></tr>
+        <tr><td class="num">31</td><td>—</td><td>Partnerstwa B2B (skala)</td><td>Duże programy firmowe.</td><td class="moscow"><span class="badge badge-wont">Won’t</span></td><td>Nie teraz.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="section" id="podsumowanie">4. Skrót liczbowy (31 pozycji funkcjonalnych)</h2>
+    <div class="summary-stats">
+      <div class="stat-card"><div class="n">16</div><div class="l">Must</div></div>
+      <div class="stat-card"><div class="n">8</div><div class="l">Should</div></div>
+      <div class="stat-card"><div class="n">4</div><div class="l">Could</div></div>
+      <div class="stat-card"><div class="n">3</div><div class="l">Won’t</div></div>
+    </div>
+
+    <h2 class="section" id="niefunkcjonalne">5. Wymagania niefunkcjonalne</h2>
+    <table class="req">
+      <thead>
+        <tr><th>Lp.</th><th>Kategoria</th><th>MoSCoW</th><th>Wymaganie</th><th>Uwagi MVP</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>N1</td><td>Bezpieczeństwo</td><td><span class="badge badge-must">Must</span></td><td>Hasło: min. 8 znaków, litery, cyfry, znak specjalny.</td><td>Tak.</td></tr>
+        <tr><td>N2</td><td>Bezpieczeństwo</td><td><span class="badge badge-must">Must</span></td><td>Hasła jako hash (np. bcrypt) lub auth dostawcy.</td><td>Tak.</td></tr>
+        <tr><td>N3</td><td>Bezpieczeństwo</td><td><span class="badge badge-must">Must</span></td><td>HTTPS w środowisku docelowym.</td><td>Tak.</td></tr>
+        <tr><td>N4</td><td>Bezpieczeństwo</td><td><span class="badge badge-should">Should</span></td><td>Szyfrowanie danych w spoczynku (np. AES-256) — docelowo.</td><td>Opisać w pracy; implementacja może być później.</td></tr>
+        <tr><td>N5</td><td>Bezpieczeństwo</td><td><span class="badge badge-could">Could</span></td><td>Audyt RODO / DPIA.</td><td>Jeśli promotor wymaga.</td></tr>
+        <tr><td>N6</td><td>Język</td><td><span class="badge badge-must">Must</span></td><td>Domyślnie polski, bez żargonu IT.</td><td>Tak.</td></tr>
+        <tr><td>N7</td><td>Język</td><td><span class="badge badge-could">Could</span></td><td>Wielojęzyczność (i18n).</td><td>Po MVP.</td></tr>
+        <tr><td>N8</td><td>Kompatybilność</td><td><span class="badge badge-must">Must</span></td><td>Android 8+ (mobile).</td><td>Minimum testów.</td></tr>
+        <tr><td>N9</td><td>Kompatybilność</td><td><span class="badge badge-must">Must</span></td><td>Web: 2 ostatnie wersje Chrome, Firefox, Edge.</td><td>Smoke test.</td></tr>
+        <tr><td>N10</td><td>Kompatybilność</td><td><span class="badge badge-must">Must</span></td><td>Responsywność; telefon od ok. 4,5".</td><td>Tak.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="section" id="dod">6. Definition of Done — koniec sprintu</h2>
+    <table class="req">
+      <thead>
+        <tr><th>Lp.</th><th>Kryterium akceptacji</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>D1</td><td>Ścieżka: organizacja dodaje ogłoszenie → wolontariusz składa zgłoszenie → akceptacja → zamknięcie zadania.</td></tr>
+        <tr><td>D2</td><td>Administrator usuwa naruszające ogłoszenie i może zablokować konto.</td></tr>
+        <tr><td>D3</td><td>Użytkownik widzi zmianę statusu w aplikacji (in-app).</td></tr>
+        <tr><td>D4</td><td>Landing WordPress kieruje do aplikacji i jest spójny z projektem graficznym.</td></tr>
+      </tbody>
+    </table>
+
+    <p class="footer-note">
+      Dokument zbiorczy: wersja raportowa HTML. Pełną macierz możesz także importować z pliku <code>arkusze-moscow/01-funkcjonalne.tsv</code> do Google Sheets.
+      Aby uzyskać PDF: otwórz ten plik w przeglądarce → Drukuj → Zapisz jako PDF.
+    </p>
+  </div>
+</body>
+</html>

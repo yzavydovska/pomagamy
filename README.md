@@ -1,14 +1,24 @@
-# PomagaMY
+# PomagaMY (`pomagamy`)
 
-Aplikacja wolontariacka — kod źródłowy.
+Repozytorium pracy dyplomowej: aplikacja wolontariacka i materiały projektu.
 
-## Pakiety
+## Pakiety aplikacji
 
 | Katalog | Opis |
 |---------|------|
-| [`mobile/`](mobile/) | Aplikacja **Expo / React Native** — główny produkt (**Android**). Instalacja i uruchomienie: [`mobile/README.md`](mobile/README.md). |
+| [`mobile/`](mobile/) | Aplikacja **Expo / React Native** — główny produkt (**Android**). Instalacja: [`mobile/README.md`](mobile/README.md). |
 | [`web/`](web/) | Warstwa webowa (Vite + React). |
-| [`wordpress-landing-wolontariat/`](wordpress-landing-wolontariat/) | Motyw WordPress — strona landing. |
+| [`wordpress-landing-wolontariat/`](wordpress-landing-wolontariat/) | Motyw WordPress — landing. |
+
+## Materiały projektu
+
+| Katalog / pliki | Opis |
+|-----------------|------|
+| [`dokumentacja-projektu/`](dokumentacja-projektu/) | Dokumentacja projektu |
+| [`prezentacja-obrona/`](prezentacja-obrona/) | Prezentacja na obronę |
+| [`arkusze-moscow/`](arkusze-moscow/), `MOSCOW-*` | Analiza MoSCoW |
+| [`figma/`](figma/) | Makiety UI |
+| [`raporty/`](raporty/) | Raporty |
 
 ## Szybki start (aplikacja mobilna)
 

@@ -1,0 +1,11 @@
+Lp.	Kategoria	MoSCoW	Wymaganie	Uwagi MVP
+N1	Bezpieczeństwo	Must	Hasło: min. 8 znaków, litery, cyfry, znak specjalny.	Tak.
+N2	Bezpieczeństwo	Must	Hasła jako hash (np. bcrypt) lub auth dostawcy.	Tak.
+N3	Bezpieczeństwo	Must	HTTPS w środowisku docelowym.	Tak.
+N4	Bezpieczeństwo	Should	Szyfrowanie danych w spoczynku (np. AES-256) — docelowo.	Opisać w pracy; implementacja może być później.
+N5	Bezpieczeństwo	Could	Audyt RODO / DPIA.	Jeśli promotor wymaga.
+N6	Język	Must	Domyślnie polski, bez żargonu IT.	Tak.
+N7	Język	Could	Wielojęzyczność (i18n).	Po MVP.
+N8	Kompatybilność	Must	Android 8+ (mobile).	Minimum testów.
+N9	Kompatybilność	Must	Web: 2 ostatnie wersje Chrome, Firefox, Edge.	Smoke test.
+N10	Kompatybilność	Must	Responsywność; telefon od ok. 4,5".	Tak.
